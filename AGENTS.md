@@ -42,7 +42,7 @@ Cantiva: a Windows desktop TTS studio (Rust + Slint) that runs open-source TTS m
 ```
 cargo test --workspace
 python -m unittest discover engines/_worker/tests
-python tests/e2e_mcp.py          # Linux/macOS; uses the dev-sine engine
+python tests/e2e_mcp.py          # Linux/macOS/Windows; uses the dev-sine engine
 python tests/screenshots.py out  # Linux with Xvfb; renders every page
 ```
 

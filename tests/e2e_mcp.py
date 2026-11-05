@@ -1,7 +1,7 @@
 """端到端測試：模擬 AI agent，透過 stdio 對 cantiva-mcp 送 MCP 請求。
 
 cantiva-mcp 會自動以無視窗模式啟動 cantiva，再由開發假引擎（dev-sine）合成。
-用法：cargo build 之後執行 `python tests/e2e_mcp.py [target/debug]`（Linux／macOS）。
+用法：cargo build 之後執行 `python tests/e2e_mcp.py [target/debug]`（Linux、macOS、Windows）。
 """
 
 import json
@@ -58,9 +58,13 @@ class Mcp:
 
 def main():
     home = Path(tempfile.mkdtemp(prefix="cantiva-e2e-"))
-    eng = home / "engines" / "dev-sine" / ".venv" / "bin"
-    eng.mkdir(parents=True)
-    os.symlink(shutil.which("python3"), eng / "python")
+    venv = home / "engines" / "dev-sine" / ".venv"
+    if os.name == "nt":
+        # Windows 的 python.exe 不能單獨 symlink，建一個真的 venv（dev-sine 只用標準函式庫）。
+        subprocess.run([sys.executable, "-m", "venv", "--without-pip", str(venv)], check=True)
+    else:
+        (venv / "bin").mkdir(parents=True)
+        os.symlink(shutil.which("python3"), venv / "bin" / "python")
     (home / "engines" / "dev-sine" / "installed.json").write_text("{}")
     env = {**os.environ, "CANTIVA_HOME": str(home), "CANTIVA_DEV": "1", "CANTIVA_ENGINES_DIR": str(ROOT / "engines")}
     # 設定檔：預設引擎改成假引擎，api 連接埠用 0（自動挑選）避免和開發機上的 Cantiva 衝突。
@@ -112,11 +116,26 @@ def main():
         print("全部通過")
     finally:
         mcp.close()
-        # 結束無視窗模式的 cantiva
-        port = (home / "api-port").read_text().strip() if (home / "api-port").exists() else None
-        subprocess.run(["pkill", "-f", f"{BIN}/cantiva --headless"], check=False)
-        time.sleep(0.5)
+        stop_headless(home)
         shutil.rmtree(home, ignore_errors=True)
+
+
+def stop_headless(home):
+    """透過控制 API 請無視窗模式的 cantiva 結束（Windows 沒有 pkill）。"""
+    port_file, token_file = home / "api-port", home / "api-token"
+    if port_file.exists() and token_file.exists():
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port_file.read_text().strip()}/v1/shutdown", data=b"", method="POST",
+            headers={"Authorization": f"Bearer {token_file.read_text().strip()}"},
+        )
+        try:
+            urllib.request.urlopen(req, timeout=5).close()
+        except OSError:
+            pass
+    elif os.name != "nt":
+        subprocess.run(["pkill", "-f", f"{BIN}/cantiva --headless"], check=False)
+    # 等它放開資料夾裡的檔案（Windows 上檔案開著就刪不掉）。
+    time.sleep(1.5)
 
 
 if __name__ == "__main__":

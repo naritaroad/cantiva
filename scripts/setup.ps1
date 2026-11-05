@@ -80,8 +80,25 @@ if ($LASTEXITCODE -ne 0) { throw 'cargo build 失敗，請把上面的錯誤訊�
 Write-Step '組成 dist\Cantiva'
 $Dist = Join-Path $Root 'dist\Cantiva'
 New-Item -ItemType Directory -Force -Path $Dist | Out-Null
-Copy-Item (Join-Path $Root 'target\release\cantiva.exe') $Dist -Force
-Copy-Item (Join-Path $Root 'target\release\cantiva-mcp.exe') $Dist -Force
+
+function Copy-Executable([string]$Name) {
+    # 註冊 MCP 之後，Cursor、Claude 等 agent 會一直開著 cantiva-mcp.exe，Windows 不能覆蓋執行中的 exe。
+    # 但可以改名：舊檔移到 *.old-<時間>，新檔照常放上；舊程序結束後下次執行時清掉。
+    $dest = Join-Path $Dist $Name
+    Get-ChildItem $Dist -Filter "$Name.old-*" -ErrorAction SilentlyContinue | ForEach-Object {
+        Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue
+    }
+    try {
+        Copy-Item (Join-Path $Root "target\release\$Name") $dest -Force
+    } catch [System.IO.IOException] {
+        $aside = "$dest.old-$(Get-Date -Format 'yyyyMMddHHmmss')"
+        Move-Item $dest $aside -Force
+        Copy-Item (Join-Path $Root "target\release\$Name") $dest -Force
+        Write-Host "$Name 正在執行中（可能是 agent 開著的），已換成新版；重新開啟該 agent 或 Cantiva 後才會用到新版。" -ForegroundColor Yellow
+    }
+}
+Copy-Executable 'cantiva.exe'
+Copy-Executable 'cantiva-mcp.exe'
 $EnginesOut = Join-Path $Dist 'engines'
 if (Test-Path $EnginesOut) { Remove-Item $EnginesOut -Recurse -Force }
 New-Item -ItemType Directory -Force -Path $EnginesOut | Out-Null
@@ -103,6 +120,14 @@ if (-not $NoShortcut) {
     $s.Description = 'Cantiva 本機語音工作室'
     $s.Save()
     Write-Host "捷徑：$lnk"
+    # 從 MSIX 套件程式（例如 Claude 桌面版）裡執行時，寫入 AppData 的檔案會被轉到
+    # %LOCALAPPDATA%\Packages\<套件>\LocalCache，開始功能表看不到這個捷徑。
+    $redirected = Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Packages\*\LocalCache\Roaming\Microsoft\Windows\Start Menu\Programs\Cantiva.lnk') -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -gt (Get-Date).AddMinutes(-5) }
+    if ($redirected) {
+        Write-Host "注意：這個 PowerShell 是從其他應用程式（$($redirected[0].FullName -replace '^.*\\Packages\\([^\\]+)\\.*$', '$1')）裡啟動的，捷徑被轉到它的私有資料夾，開始功能表看不到。" -ForegroundColor Yellow
+        Write-Host '請從開始功能表開一個 PowerShell，在專案資料夾執行：powershell -ExecutionPolicy Bypass -File scripts\setup.ps1 -SkipTools' -ForegroundColor Yellow
+    }
 }
 
 if (-not (Test-Path (Join-Path $Root '.git'))) {

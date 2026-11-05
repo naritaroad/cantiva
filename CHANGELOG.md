@@ -4,6 +4,20 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Windows 的預設資料夾從 `%APPDATA%\Naritaroad\Cantiva\data` 改成 `%USERPROFILE%\Cantiva`。從 Claude 桌面版這類 MSIX 套件程式啟動的程序寫入 AppData 時，會被轉到該程式的私有資料夾，造成 agent 合成的音檔與裝好的引擎在 Cantiva 裡看不到。0.1.0 的資料請整個資料夾搬到新位置；或設定 `CANTIVA_HOME` 指向舊位置。
+
+### Fixed
+
+- `setup.ps1` 重跑時，如果 `cantiva-mcp.exe` 或 `cantiva.exe` 正被 agent（例如 Cursor）開著，不再因為無法覆蓋而失敗：舊檔改名移開後放上新版。
+- `setup.ps1` 從其他應用程式（例如 Claude 桌面版）裡執行時，會偵測開始功能表捷徑是否被轉到私有資料夾，並提示改在一般 PowerShell 重跑。
+- 無視窗模式收到結束要求時，記錄改寫成「收到結束要求」，不再一律寫成主視窗接手。
+
+- Windows：`engines/_worker` 的自我測試單元測試改用 UTF-8 讀取子程序輸出，不再因系統字碼頁（cp950）解碼失敗。
+- Windows：`studio_dev_engine` 整合測試不再跳過，改用 `python -m venv` 建立假引擎的 venv，完整流程在 Windows 上也會測到 worker 啟動與合成。
+- Windows：`tests/e2e_mcp.py` 可以在 Windows 執行，結束時改用控制 API 的 `/v1/shutdown` 關閉無視窗模式，不再依賴 `pkill`。
+
 ## [0.1.0] - 2026-11-05
 
 ### Added

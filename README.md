@@ -85,12 +85,12 @@ Rust 負責介面、音訊處理、工作排程與 MCP；Python 只負責呼叫�
 
 | 內容 | 位置 |
 |---|---|
-| 設定、資料庫、記錄檔 | `%APPDATA%\Naritaroad\Cantiva\data` |
-| 各模型的虛擬環境與權重 | `…\data\engines\<引擎>` |
-| 合成的音檔 | `…\data\takes\<專案>`（可在設定中修改） |
-| 參考音檔與角色模型 | `…\data\references` |
+| 設定、資料庫、記錄檔 | `%USERPROFILE%\Cantiva` |
+| 各模型的虛擬環境與權重 | `…\Cantiva\engines\<引擎>` |
+| 合成的音檔 | `…\Cantiva\takes\<專案>`（可在設定中修改） |
+| 參考音檔與角色模型 | `…\Cantiva\references` |
 
-設定環境變數 `CANTIVA_HOME` 可以把整個資料夾搬到別處。
+設定環境變數 `CANTIVA_HOME` 可以把整個資料夾搬到別處。不放在 `%APPDATA%` 是因為從 Claude 桌面版這類 MSIX 套件程式啟動的程序寫入 AppData 時，會被轉到該程式的私有資料夾，Cantiva 看不到。
 
 </details>
 
@@ -141,7 +141,7 @@ cantiva/
 ```bash
 cargo test --workspace                      # Rust 單元與整合測試（含假引擎的完整流程）
 python -m unittest discover engines/_worker/tests
-python tests/e2e_mcp.py                     # 模擬 agent 呼叫 MCP 的端到端測試（Linux／macOS）
+python tests/e2e_mcp.py                     # 模擬 agent 呼叫 MCP 的端到端測試
 ```
 
 修改前請先讀 [AGENTS.md](AGENTS.md)，變更記錄在 [CHANGELOG.md](CHANGELOG.md)。

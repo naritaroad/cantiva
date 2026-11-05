@@ -28,7 +28,7 @@ pub fn run(rt: Runtime) -> anyhow::Result<()> {
                     }
                 }
                 _ = stop.notified() => {
-                    tracing::info!("主視窗接手，無視窗模式結束");
+                    tracing::info!("收到結束要求（通常是主視窗要接手），無視窗模式結束");
                     break;
                 }
                 _ = tokio::signal::ctrl_c() => break,

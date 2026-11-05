@@ -11,8 +11,9 @@ $env:PYTHONIOENCODING = 'utf-8'
 
 function Get-CantivaHome {
     if ($env:CANTIVA_HOME) { return $env:CANTIVA_HOME }
-    # 與 Rust 端 directories::ProjectDirs::from("tw", "Naritaroad", "Cantiva") 的 data_dir 相同
-    return (Join-Path $env:APPDATA 'Naritaroad\Cantiva\data')
+    # 與 Rust 端 cantiva_core::paths::default_root 相同。不用 %APPDATA%：從 MSIX 套件程式
+    # （例如 Claude 桌面版）啟動時，寫入 AppData 會被轉到套件的私有資料夾，Cantiva 看不到。
+    return (Join-Path $env:USERPROFILE 'Cantiva')
 }
 
 function Write-Step([string]$Message) {

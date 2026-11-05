@@ -1,11 +1,29 @@
 //! 所有檔案位置集中在這裡。
 //!
-//! 預設放在 `%APPDATA%\Cantiva`（Windows）；設定環境變數 `CANTIVA_HOME` 可以整個搬走，
-//! 測試也靠它把資料寫到暫存資料夾。
+//! Windows 預設放在 `%USERPROFILE%\Cantiva`，其他系統用作業系統的應用程式資料夾；
+//! 設定環境變數 `CANTIVA_HOME` 可以整個搬走，測試也靠它把資料寫到暫存資料夾。
+//!
+//! Windows 不放 `%APPDATA%`：從 MSIX 套件程式（例如 Claude 桌面版）啟動的程序寫入 AppData 時，
+//! 會被轉到該套件的私有資料夾，其他程式看不到。這樣 agent 合成的音檔、裝好的引擎
+//! 會和使用者自己開的 Cantiva 分成兩份。使用者資料夾不會被轉址。
 
 use std::path::{Path, PathBuf};
 
 use crate::{Error, Result};
+
+/// 沒有設定 `CANTIVA_HOME` 時的根目錄。engines/_common.ps1 的 Get-CantivaHome 要保持一致。
+#[cfg(windows)]
+fn default_root() -> Result<PathBuf> {
+    let dirs = directories::BaseDirs::new().ok_or_else(|| Error::Invalid("找不到使用者資料夾".into()))?;
+    Ok(dirs.home_dir().join("Cantiva"))
+}
+
+#[cfg(not(windows))]
+fn default_root() -> Result<PathBuf> {
+    let dirs = directories::ProjectDirs::from("tw", "Naritaroad", "Cantiva")
+        .ok_or_else(|| Error::Invalid("找不到使用者資料夾".into()))?;
+    Ok(dirs.data_dir().to_path_buf())
+}
 
 #[derive(Debug, Clone)]
 pub struct AppPaths {
@@ -18,9 +36,7 @@ impl AppPaths {
         if let Some(home) = std::env::var_os("CANTIVA_HOME") {
             return Ok(Self::at(PathBuf::from(home)));
         }
-        let dirs = directories::ProjectDirs::from("tw", "Naritaroad", "Cantiva")
-            .ok_or_else(|| Error::Invalid("找不到使用者資料夾".into()))?;
-        Ok(Self::at(dirs.data_dir().to_path_buf()))
+        Ok(Self::at(default_root()?))
     }
 
     pub fn at(root: impl Into<PathBuf>) -> Self {

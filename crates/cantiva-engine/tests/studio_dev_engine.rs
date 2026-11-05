@@ -1,7 +1,5 @@
 //! 用開發假引擎（dev-sine）跑完整流程：啟動 Python worker → 分段合成 → 合併 → 正規化 → 存檔。
-//! 需要系統上有 python3（CI 與開發機都有）。Windows 上跳過，因為假的 venv 是用 symlink 做的。
-
-#![cfg(unix)]
+//! 需要系統上有 Python 3（Unix 找 python3，Windows 找 python.exe）。
 
 use std::path::{Path, PathBuf};
 use std::time::Duration;
@@ -16,19 +14,39 @@ fn setup(name: &str) -> (std::sync::Arc<Studio>, PathBuf) {
     let root = std::env::temp_dir().join(format!("cantiva-it-{name}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
     let paths = AppPaths::at(&root);
-    // 假裝 dev-sine 已安裝：.venv/bin/python 指到系統 python3。
+    // 假裝 dev-sine 已安裝：dev-sine 只用標準函式庫，所以系統 Python 就夠了。
     let home = paths.engine_home("dev-sine");
-    std::fs::create_dir_all(home.join(".venv/bin")).unwrap();
-    let python = which("python3").expect("python3");
-    std::os::unix::fs::symlink(python, home.join(".venv/bin/python")).unwrap();
+    fake_venv(&home.join(".venv"));
     std::fs::write(home.join("installed.json"), "{}").unwrap();
     let engines_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../engines");
     let studio = Studio::open(StudioConfig { paths, engines_dir, load_timeout: Duration::from_secs(30) }).unwrap();
     (studio, root)
 }
 
+/// Unix：.venv/bin/python 用 symlink 指到系統 python3。
+#[cfg(unix)]
+fn fake_venv(venv: &Path) {
+    std::fs::create_dir_all(venv.join("bin")).unwrap();
+    let python = which("python3").expect("python3");
+    std::os::unix::fs::symlink(python, venv.join("bin/python")).unwrap();
+}
+
+/// Windows：python.exe 不能單獨複製或 symlink（要找得到旁邊的 DLL 與標準函式庫），
+/// 所以建一個真的 venv（不裝 pip，約一兩秒）。
+#[cfg(windows)]
+fn fake_venv(venv: &Path) {
+    let python = which("python.exe").expect("python.exe");
+    let status = std::process::Command::new(python)
+        .args(["-m", "venv", "--without-pip"])
+        .arg(venv)
+        .status()
+        .expect("python -m venv");
+    assert!(status.success(), "python -m venv 失敗");
+    assert!(venv.join("Scripts").join("python.exe").is_file());
+}
+
 fn which(bin: &str) -> Option<PathBuf> {
-    std::env::var_os("PATH")?.to_str()?.split(':').map(|d| Path::new(d).join(bin)).find(|p| p.is_file())
+    std::env::split_paths(&std::env::var_os("PATH")?).map(|d| d.join(bin)).find(|p| p.is_file())
 }
 
 #[tokio::test]
