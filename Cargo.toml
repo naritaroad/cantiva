@@ -1,0 +1,23 @@
+[workspace]
+resolver = "3"
+members = [
+    "app",
+    "mcp",
+    "crates/cantiva-core",
+    "crates/cantiva-engine",
+    "crates/cantiva-audio",
+    "crates/cantiva-api",
+]
+default-members = ["app", "mcp"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.92"
+license = "MIT"
+authors = ["Naritaroad (Lrniey666)"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

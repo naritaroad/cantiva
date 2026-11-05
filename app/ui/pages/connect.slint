@@ -1,0 +1,188 @@
+import { ScrollView } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+import { AppState, ClientConfig } from "../state.slint";
+import { Panel, PanelHeader, Button, ButtonKind, FieldLabel, Divider, Tag, StatusDot, Toggle } from "../widgets.slint";
+
+component ConfigCard inherits Rectangle {
+    in property <ClientConfig> config;
+    background: Theme.panel;
+    border-width: 1px;
+    border-color: Theme.line;
+    height: layout.preferred-height;
+    layout := VerticalLayout {
+        padding: 12px;
+        spacing: 6px;
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: root.config.client;
+                color: Theme.text;
+                font-size: Theme.font-strong;
+                font-weight: 600;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+            }
+            Button {
+                text: "複製";
+                clicked => { AppState.copy-text(root.config.snippet); }
+            }
+        }
+        Text {
+            text: root.config.location;
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+        Rectangle {
+            background: #101012;
+            border-radius: Theme.radius;
+            height: code.preferred-height + 16px;
+            code := Text {
+                x: 10px;
+                width: parent.width - 20px;
+                text: root.config.snippet;
+                color: Theme.text;
+                font-family: Theme.mono-family;
+                font-size: Theme.font-small;
+                wrap: word-wrap;
+                vertical-alignment: center;
+            }
+        }
+        if root.config.note != "": Text {
+            text: root.config.note;
+            color: Theme.text-dim;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+    }
+}
+
+component LocalClients inherits Panel {
+    PanelHeader {
+        title: "本機 AI agent";
+        detail: AppState.api-status;
+        Button {
+            text: "安裝 skill";
+            kind: ButtonKind.quiet;
+            clicked => { AppState.install-skill(); }
+        }
+    }
+    ScrollView {
+        vertical-stretch: 1;
+        VerticalLayout {
+            padding: 8px;
+            spacing: 8px;
+            alignment: start;
+            Text {
+                text: "這些 agent 在你的電腦上執行，透過 stdio 直接啟動 cantiva-mcp，不經過網路。Cantiva 沒開時會自動以無視窗模式啟動。";
+                color: Theme.text-dim;
+                font-size: Theme.font-body;
+                wrap: word-wrap;
+            }
+            for c in AppState.client-configs: ConfigCard { config: c; }
+        }
+    }
+}
+
+component Tunnel inherits Panel {
+    PanelHeader { title: "對外通道（ChatGPT、Grok 等雲端 agent）"; }
+    VerticalLayout {
+        padding: Theme.pad;
+        spacing: 10px;
+        alignment: start;
+        vertical-stretch: 1;
+        Text {
+            text: "雲端的 agent 連不到你的電腦。開啟通道後，Cloudflare 會給一個公開網址，網址裡含有一段只有你知道的密鑰。";
+            color: Theme.text-dim;
+            font-size: Theme.font-body;
+            wrap: word-wrap;
+        }
+        HorizontalLayout {
+            spacing: 10px;
+            VerticalLayout {
+                alignment: center;
+                StatusDot { tint: AppState.tunnel-running ? Theme.ok : Theme.text-faint; pulse: AppState.tunnel-running && AppState.tunnel-url == ""; }
+            }
+            Text {
+                text: AppState.tunnel-status;
+                color: Theme.text;
+                font-size: Theme.font-body;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+            }
+            VerticalLayout {
+                alignment: center;
+                Toggle {
+                    enabled: AppState.tunnel-available;
+                    checked <=> AppState.tunnel-running;
+                    toggled(on) => { AppState.toggle-tunnel(on); }
+                }
+            }
+        }
+        if !AppState.tunnel-available: Text {
+            text: "找不到 cloudflared。請在 PowerShell 執行：winget install --id Cloudflare.cloudflared，再重新開啟 Cantiva。";
+            color: Theme.warn;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+        if AppState.tunnel-url != "": VerticalLayout {
+            spacing: 6px;
+            FieldLabel { text: "MCP 網址（含密鑰，不要公開分享）"; }
+            Rectangle {
+                background: #101012;
+                border-radius: Theme.radius;
+                height: url.preferred-height + 16px;
+                url := Text {
+                    x: 10px;
+                    width: parent.width - 20px;
+                    text: AppState.tunnel-url;
+                    color: Theme.accent;
+                    font-family: Theme.mono-family;
+                    font-size: Theme.font-small;
+                    wrap: word-wrap;
+                    vertical-alignment: center;
+                }
+            }
+            Button {
+                text: "複製網址";
+                kind: ButtonKind.primary;
+                clicked => { AppState.copy-text(AppState.tunnel-url); }
+            }
+        }
+        Divider { }
+        HorizontalLayout {
+            spacing: 10px;
+            Text {
+                text: "允許透過通道使用複製的聲音";
+                color: Theme.text;
+                font-size: Theme.font-body;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+            }
+            VerticalLayout {
+                alignment: center;
+                Toggle {
+                    checked <=> AppState.tunnel-allow-clone;
+                    toggled(on) => { AppState.tunnel-clone-changed(on); }
+                }
+            }
+        }
+        Text {
+            text: "ChatGPT：設定 → 應用程式 → 進階設定 → 開發人員模式 → 建立應用程式，驗證選「不需要驗證」，貼上網址。\nGrok Bot：在對話中新增 MCP 伺服器，貼上網址。\n臨時通道的網址每次開啟都會變，關閉 Cantiva 時會自動關閉。";
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+    }
+    Rectangle { vertical-stretch: 1; }
+}
+
+export component ConnectPage inherits Rectangle {
+    background: Theme.window;
+    HorizontalLayout {
+        padding: 6px;
+        spacing: 6px;
+        LocalClients { horizontal-stretch: 1; }
+        Tunnel { width: 420px; }
+    }
+}

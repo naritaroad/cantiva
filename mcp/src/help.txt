@@ -1,0 +1,11 @@
+cantiva-mcp：讓 AI agent 使用 Cantiva 本機語音工作室的 MCP server
+
+用法：
+  cantiva-mcp                    以 stdio 執行（Claude Code、Claude Desktop、Codex、Cursor、Grok CLI）
+  cantiva-mcp --http             以 Streamable HTTP 執行，網址 http://127.0.0.1:47821/mcp
+  cantiva-mcp --http --port N    改用其他連接埠
+  cantiva-mcp --tunnel           給對外通道用：工具權限縮小，不能建立或使用複製聲音
+  cantiva-mcp --print-config     印出各 agent 的設定範例
+  cantiva-mcp --no-autostart     Cantiva 沒開時不要自動以無視窗模式啟動
+
+Cantiva 沒有在執行時，cantiva-mcp 會自動以無視窗模式啟動它（cantiva --headless）。

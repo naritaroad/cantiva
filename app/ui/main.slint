@@ -1,0 +1,262 @@
+import { Theme } from "theme.slint";
+import { AppState } from "state.slint";
+import { Icon, Icons, StatusDot, Button, ButtonKind } from "widgets.slint";
+import { ScriptPage } from "pages/script.slint";
+import { TimelinePage } from "pages/timeline.slint";
+import { VoicesPage } from "pages/voices.slint";
+import { DeliverPage } from "pages/deliver.slint";
+import { EnginesPage } from "pages/engines.slint";
+import { ConnectPage } from "pages/connect.slint";
+import { AboutSlint } from "std-widgets.slint";
+
+export { AppState, Theme }
+
+component TopBar inherits Rectangle {
+    height: 34px;
+    background: Theme.header;
+    Rectangle {
+        y: parent.height - 1px;
+        height: 1px;
+        background: Theme.line;
+    }
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        spacing: 14px;
+        Text {
+            text: "Cantiva";
+            color: Theme.text;
+            font-size: Theme.font-strong;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            vertical-alignment: center;
+        }
+        Text {
+            text: "本機語音工作室";
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            vertical-alignment: center;
+        }
+        Rectangle { horizontal-stretch: 1; }
+        Text {
+            text: AppState.project-name;
+            color: Theme.text;
+            font-size: Theme.font-body;
+            vertical-alignment: center;
+        }
+        Rectangle { horizontal-stretch: 1; }
+        if AppState.busy: HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: AppState.job-label;
+                color: Theme.text-dim;
+                font-size: Theme.font-small;
+                vertical-alignment: center;
+            }
+            Rectangle {
+                width: 120px;
+                height: 4px;
+                y: (parent.height - 4px) / 2;
+                background: Theme.line;
+                border-radius: 2px;
+                Rectangle {
+                    x: 0;
+                    width: parent.width * max(0.04, min(1, AppState.job-progress));
+                    background: Theme.accent;
+                    border-radius: 2px;
+                    animate width { duration: 200ms; }
+                }
+            }
+        }
+        HorizontalLayout {
+            spacing: 6px;
+            VerticalLayout {
+                alignment: center;
+                StatusDot {
+                    tint: AppState.engine-state == "ready" ? Theme.ok
+                        : AppState.engine-state == "busy" || AppState.engine-state == "loading" ? Theme.accent
+                        : AppState.engine-state == "failed" ? Theme.danger : Theme.text-faint;
+                    pulse: AppState.engine-state == "loading" || AppState.engine-state == "busy";
+                }
+            }
+            Text {
+                text: AppState.engine-summary;
+                color: Theme.text-dim;
+                font-size: Theme.font-small;
+                vertical-alignment: center;
+            }
+        }
+        Button {
+            y: (parent.height - self.height) / 2;
+            text: "關於";
+            kind: ButtonKind.quiet;
+            clicked => { AppState.show-about(); }
+        }
+    }
+}
+
+component PageTab inherits Rectangle {
+    in property <string> icon;
+    in property <string> label;
+    in property <int> index;
+    property <bool> active: AppState.page == root.index;
+    width: 84px;
+    height: 46px;
+    background: ta.has-hover && !root.active ? Theme.hover : transparent;
+    VerticalLayout {
+        alignment: center;
+        spacing: 3px;
+        HorizontalLayout {
+            alignment: center;
+            Icon {
+                commands: root.icon;
+                tint: root.active ? Theme.accent : ta.has-hover ? Theme.text : Theme.text-dim;
+                width: 20px;
+                height: 20px;
+            }
+        }
+        Text {
+            text: root.label;
+            color: root.active ? Theme.accent : Theme.text-dim;
+            font-size: Theme.font-small;
+            horizontal-alignment: center;
+        }
+    }
+    Rectangle {
+        y: 0;
+        height: 2px;
+        width: 36px;
+        x: (parent.width - 36px) / 2;
+        background: root.active ? Theme.accent : transparent;
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { AppState.page = root.index; }
+    }
+}
+
+// Resolve 式的頁面列：左群組是製作流程，右群組是設定。
+component PageBar inherits Rectangle {
+    height: 48px;
+    background: Theme.header;
+    Rectangle {
+        y: 0;
+        height: 1px;
+        background: Theme.line;
+    }
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 12px;
+        Rectangle { horizontal-stretch: 1; }
+        PageTab { icon: Icons.voices; label: "聲音庫"; index: 0; }
+        PageTab { icon: Icons.script; label: "腳本"; index: 1; }
+        PageTab { icon: Icons.timeline; label: "時間軸"; index: 2; }
+        PageTab { icon: Icons.deliver; label: "輸出"; index: 3; }
+        Rectangle {
+            width: 1px;
+            background: Theme.line;
+        }
+        Rectangle { width: 12px; }
+        PageTab { icon: Icons.engines; label: "引擎"; index: 4; }
+        PageTab { icon: Icons.connect; label: "連線"; index: 5; }
+        Rectangle { horizontal-stretch: 1; }
+    }
+}
+
+component Toast inherits Rectangle {
+    in property <string> text;
+    in property <bool> error;
+    height: t.preferred-height + 20px;
+    width: min(560px, t.preferred-width + 60px);
+    border-radius: Theme.radius;
+    background: Theme.raised;
+    border-width: 1px;
+    border-color: root.error ? Theme.danger : Theme.line-strong;
+    drop-shadow-blur: 12px;
+    drop-shadow-color: #00000080;
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 6px;
+        spacing: 8px;
+        t := Text {
+            text: root.text;
+            color: root.error ? Theme.danger : Theme.text;
+            font-size: Theme.font-body;
+            wrap: word-wrap;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+        }
+        Button {
+            text: "關閉";
+            kind: ButtonKind.quiet;
+            y: (parent.height - self.height) / 2;
+            clicked => { AppState.dismiss-toast(); }
+        }
+    }
+}
+
+export component AppWindow inherits Window {
+    title: "Cantiva — " + AppState.project-name;
+    preferred-width: 1440px;
+    preferred-height: 860px;
+    min-width: 1100px;
+    min-height: 640px;
+    background: Theme.window;
+    default-font-family: Theme.font-family;
+    default-font-size: Theme.font-body;
+    icon: @image-url("../assets/icon.png");
+
+    VerticalLayout {
+        TopBar { }
+        Rectangle {
+            vertical-stretch: 1;
+            if AppState.page == 0: VoicesPage { }
+            if AppState.page == 1: ScriptPage { }
+            if AppState.page == 2: TimelinePage { }
+            if AppState.page == 3: DeliverPage { }
+            if AppState.page == 4: EnginesPage { }
+            if AppState.page == 5: ConnectPage { }
+        }
+        PageBar { }
+    }
+
+    if AppState.toast != "": Toast {
+        x: (parent.width - self.width) / 2;
+        y: parent.height - 48px - self.height - 14px;
+        text: AppState.toast;
+        error: AppState.toast-error;
+    }
+}
+
+// Slint 免版稅授權要求在「關於」畫面顯示 AboutSlint。
+export component AboutWindow inherits Window {
+    in property <string> data-dir;
+    title: "關於 Cantiva";
+    width: 460px;
+    height: 420px;
+    background: Theme.panel;
+    default-font-family: Theme.font-family;
+    VerticalLayout {
+        padding: 20px;
+        spacing: 10px;
+        Text { text: "Cantiva 0.1.0"; color: Theme.text; font-size: Theme.font-title; font-weight: 700; }
+        Text {
+            text: "本機語音工作室。模型、聲音與音檔都留在這台電腦。";
+            color: Theme.text-dim;
+            wrap: word-wrap;
+        }
+        Text {
+            text: "資料夾：" + root.data-dir;
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+        Text {
+            text: "各模型的授權不同，請看「引擎」頁。產生的聲音由使用者負責；複製他人聲音前請取得同意。";
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+        AboutSlint { }
+    }
+}

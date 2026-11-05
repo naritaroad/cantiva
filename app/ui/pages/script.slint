@@ -1,0 +1,280 @@
+import { TextEdit, LineEdit, ComboBox, ScrollView } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+import { AppState, ScriptLineItem } from "../state.slint";
+import { Panel, PanelHeader, Button, ButtonKind, FieldLabel, Divider, Tag, Slider } from "../widgets.slint";
+
+component ProjectRow inherits Rectangle {
+    in property <string> name;
+    in property <bool> selected;
+    callback clicked();
+    height: 30px;
+    background: root.selected ? Theme.accent-dim : ta.has-hover ? Theme.hover : transparent;
+    Rectangle {
+        x: 0;
+        width: 2px;
+        background: root.selected ? Theme.accent : transparent;
+    }
+    Text {
+        x: 12px;
+        width: parent.width - 20px;
+        text: root.name;
+        color: root.selected ? Theme.text : Theme.text-dim;
+        font-size: Theme.font-body;
+        vertical-alignment: center;
+        overflow: elide;
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+component ProjectsPanel inherits Panel {
+    property <bool> adding: false;
+    PanelHeader {
+        title: "專案";
+        Button {
+            text: "新增";
+            kind: ButtonKind.quiet;
+            clicked => { root.adding = true; }
+        }
+    }
+    if root.adding: Rectangle {
+        height: 40px;
+        background: Theme.raised;
+        HorizontalLayout {
+            padding: 6px;
+            spacing: 4px;
+            name-input := LineEdit {
+                placeholder-text: "專案名稱";
+                accepted(text) => {
+                    AppState.create-project(text);
+                    root.adding = false;
+                }
+            }
+            Button {
+                text: "取消";
+                kind: ButtonKind.quiet;
+                clicked => { root.adding = false; }
+            }
+        }
+    }
+    ScrollView {
+        vertical-stretch: 1;
+        VerticalLayout {
+            alignment: start;
+            for name[i] in AppState.projects: ProjectRow {
+                name: name;
+                selected: i == AppState.project-index;
+                clicked => { AppState.select-project(i); }
+            }
+        }
+    }
+}
+
+component LineRow inherits Rectangle {
+    in property <ScriptLineItem> line;
+    in property <bool> enabled;
+    height: content.preferred-height + 12px;
+    background: ta.has-hover ? Theme.raised : transparent;
+    content := HorizontalLayout {
+        padding-left: 10px;
+        padding-right: 8px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        spacing: 10px;
+        Text {
+            text: root.line.index < 10 ? "00" + root.line.index : root.line.index < 100 ? "0" + root.line.index : root.line.index;
+            color: Theme.text-faint;
+            font-family: Theme.mono-family;
+            font-size: Theme.font-small;
+            width: 28px;
+        }
+        VerticalLayout {
+            spacing: 2px;
+            horizontal-stretch: 1;
+            HorizontalLayout {
+                spacing: 6px;
+                alignment: start;
+                Text {
+                    text: root.line.voice == "" ? "預設聲音" : root.line.voice;
+                    color: root.line.voice == "" ? Theme.text-faint : Theme.accent;
+                    font-size: Theme.font-small;
+                    font-weight: 600;
+                }
+                if root.line.instruct != "": Text {
+                    text: "｛" + root.line.instruct + "｝";
+                    color: Theme.text-dim;
+                    font-size: Theme.font-small;
+                }
+            }
+            Text {
+                text: root.line.text;
+                color: Theme.text;
+                font-size: Theme.font-body;
+                wrap: word-wrap;
+            }
+        }
+        Text {
+            text: root.line.seconds;
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            vertical-alignment: top;
+        }
+        if ta.has-hover: Button {
+            text: "合成這行";
+            kind: ButtonKind.quiet;
+            enabled: root.enabled;
+            clicked => { AppState.render-line(root.line.index); }
+        }
+    }
+    ta := TouchArea { }
+}
+
+component ScriptPanel inherits Panel {
+    PanelHeader {
+        title: "腳本";
+        detail: AppState.project-name;
+        Text {
+            text: "沒寫聲音的行用";
+            color: Theme.text-dim;
+            font-size: Theme.font-small;
+            vertical-alignment: center;
+        }
+        ComboBox {
+            width: 190px;
+            model: AppState.voice-names;
+            current-index <=> AppState.default-voice-index;
+        }
+        Button {
+            text: "合成全部";
+            kind: ButtonKind.primary;
+            enabled: !AppState.busy && AppState.script-lines.length > 0;
+            clicked => { AppState.render-script(); }
+        }
+    }
+    editor := TextEdit {
+        vertical-stretch: 3;
+        text <=> AppState.script-text;
+        font-size: 14px;
+        edited(text) => { AppState.script-edited(text); }
+    }
+    Rectangle {
+        height: 26px;
+        background: Theme.raised;
+        HorizontalLayout {
+            padding-left: 10px;
+            padding-right: 10px;
+            spacing: 12px;
+            Text {
+                text: AppState.script-summary;
+                color: Theme.text-dim;
+                font-size: Theme.font-small;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+            }
+            Text {
+                text: "@聲音：指定聲音　｛溫柔、放慢｝語氣指示　# 註解　空行分段";
+                color: Theme.text-faint;
+                font-size: Theme.font-small;
+                vertical-alignment: center;
+            }
+        }
+    }
+    ScrollView {
+        vertical-stretch: 2;
+        VerticalLayout {
+            alignment: start;
+            for line in AppState.script-lines: LineRow {
+                line: line;
+                enabled: !AppState.busy;
+            }
+            if AppState.script-lines.length == 0: Text {
+                text: "在上方寫下台詞，每段一行。例如：\n@qwen3-tts/Serena：{溫柔}晚安，今天辛苦了。";
+                color: Theme.text-faint;
+                font-size: Theme.font-body;
+                horizontal-alignment: center;
+                height: 80px;
+                vertical-alignment: center;
+            }
+        }
+    }
+}
+
+component QuickPanel inherits Panel {
+    PanelHeader { title: "快速合成"; }
+    VerticalLayout {
+        padding: Theme.pad;
+        spacing: 6px;
+        vertical-stretch: 1;
+        FieldLabel { text: "文字"; }
+        TextEdit {
+            height: 120px;
+            text <=> AppState.quick-text;
+            font-size: 13px;
+        }
+        FieldLabel { text: "聲音"; }
+        ComboBox {
+            model: AppState.voice-names;
+            current-index <=> AppState.quick-voice-index;
+            selected => { AppState.quick-voice-changed(self.current-index); }
+        }
+        if AppState.quick-hint != "": Text {
+            text: AppState.quick-hint;
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+        FieldLabel { text: "語氣指示（Qwen3-TTS、CosyVoice3）"; }
+        LineEdit {
+            placeholder-text: "例如：用溫柔、放慢的語氣";
+            text <=> AppState.quick-instruct;
+        }
+        FieldLabel { text: "情緒（IndexTTS）"; }
+        HorizontalLayout {
+            spacing: 8px;
+            ComboBox {
+                horizontal-stretch: 1;
+                model: ["不指定", "開心", "生氣", "難過", "害怕", "厭惡", "低落", "驚訝", "平靜"];
+                current-index <=> AppState.quick-emotion-index;
+            }
+            Slider {
+                width: 90px;
+                minimum: 0.1;
+                maximum: 1.0;
+                value <=> AppState.quick-emotion-strength;
+                enabled: AppState.quick-emotion-index > 0;
+            }
+        }
+        FieldLabel { text: "語速 " + round(AppState.quick-speed * 100) / 100 + "×（CosyVoice3、IndexTTS、GPT-SoVITS）"; }
+        Slider {
+            minimum: 0.5;
+            maximum: 2.0;
+            value <=> AppState.quick-speed;
+        }
+        FieldLabel { text: "隨機種子（選填，固定後每次結果相同）"; }
+        LineEdit {
+            input-type: number;
+            text <=> AppState.quick-seed;
+        }
+        Rectangle { vertical-stretch: 1; }
+        Button {
+            text: AppState.busy ? "合成中…" : "合成";
+            kind: ButtonKind.primary;
+            height: 30px;
+            enabled: !AppState.busy && AppState.quick-text != "";
+            clicked => { AppState.quick-speak(); }
+        }
+    }
+}
+
+export component ScriptPage inherits Rectangle {
+    background: Theme.window;
+    HorizontalLayout {
+        padding: 6px;
+        spacing: 6px;
+        ProjectsPanel { width: 190px; }
+        ScriptPanel { horizontal-stretch: 1; }
+        QuickPanel { width: 300px; }
+    }
+}

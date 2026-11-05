@@ -1,0 +1,33 @@
+# 開發與測試用的假引擎：用正弦波模擬語音，不需要 GPU 與模型權重。
+# 只有設定環境變數 CANTIVA_DEV=1 時才會出現在 App 裡。
+id = "dev-sine"
+name = "開發測試引擎"
+vendor = "Cantiva"
+summary = "用嗶聲模擬語音，測試整條流程用"
+license = "MIT"
+license_url = "https://opensource.org/license/mit"
+homepage = "https://github.com/naritaroad/cantiva"
+min_vram_gb = 0.0
+sample_rate = 24000
+languages = ["zh", "en"]
+chunk_chars = 40
+order = 99
+
+[capabilities]
+clone = true
+instruct = true
+emotion = true
+speed = true
+trained_models = true
+
+[[builtin_voices]]
+id = "low"
+label = "低音"
+language = "zh"
+gender = "中性"
+
+[[builtin_voices]]
+id = "high"
+label = "高音"
+language = "zh"
+gender = "中性"

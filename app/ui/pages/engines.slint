@@ -1,0 +1,158 @@
+import { ScrollView } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+import { AppState, EngineItem } from "../state.slint";
+import { Panel, PanelHeader, Button, ButtonKind, FieldLabel, Divider, Tag, StatusDot, InfoRow } from "../widgets.slint";
+
+component EngineCard inherits Rectangle {
+    in property <EngineItem> engine;
+    property <bool> installed: root.engine.state != "not_installed";
+    property <bool> loaded: root.engine.state == "ready" || root.engine.state == "busy";
+    property <color> state-color: root.engine.state == "ready" ? Theme.ok
+        : root.engine.state == "busy" || root.engine.state == "loading" ? Theme.accent
+        : root.engine.state == "failed" ? Theme.danger
+        : root.engine.state == "idle" ? Theme.text-dim : Theme.text-faint;
+    background: Theme.panel;
+    border-width: 1px;
+    border-color: root.loaded ? Theme.accent.transparentize(0.5) : Theme.line;
+    VerticalLayout {
+        padding: 14px;
+        spacing: 8px;
+        HorizontalLayout {
+            spacing: 8px;
+            VerticalLayout {
+                horizontal-stretch: 1;
+                spacing: 2px;
+                Text {
+                    text: root.engine.name;
+                    color: Theme.text;
+                    font-size: Theme.font-title;
+                    font-weight: 600;
+                }
+                Text {
+                    text: root.engine.vendor;
+                    color: Theme.text-faint;
+                    font-size: Theme.font-small;
+                }
+            }
+            HorizontalLayout {
+                spacing: 6px;
+                alignment: end;
+                VerticalLayout {
+                    alignment: center;
+                    StatusDot { tint: root.state-color; pulse: root.engine.state == "loading" || root.engine.state == "busy"; }
+                }
+                Text {
+                    text: root.engine.state-label;
+                    color: root.state-color;
+                    font-size: Theme.font-small;
+                    vertical-alignment: center;
+                }
+            }
+        }
+        Text {
+            text: root.engine.summary;
+            color: Theme.text-dim;
+            font-size: Theme.font-body;
+            wrap: word-wrap;
+        }
+        Text {
+            text: root.engine.features;
+            color: Theme.accent;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+        VerticalLayout {
+            spacing: 4px;
+            InfoRow { label: "顯示記憶體"; value: root.engine.vram; label-width: 80px; }
+            InfoRow { label: "語言"; value: root.engine.languages; label-width: 80px; }
+            InfoRow { label: "授權"; value: root.engine.license; label-width: 80px; }
+        }
+        if root.engine.error != "": Rectangle {
+            background: Theme.danger.transparentize(0.88);
+            border-radius: Theme.radius;
+            height: err.preferred-height + 12px;
+            err := Text {
+                x: 8px;
+                width: parent.width - 16px;
+                text: root.engine.error;
+                color: Theme.danger;
+                font-size: Theme.font-small;
+                wrap: word-wrap;
+                vertical-alignment: center;
+            }
+        }
+        Rectangle { vertical-stretch: 1; }
+        HorizontalLayout {
+            spacing: 6px;
+            alignment: start;
+            if !root.installed: Button {
+                text: "安裝";
+                kind: ButtonKind.primary;
+                clicked => { AppState.install-engine(root.engine.id); }
+            }
+            if root.installed && !root.loaded: Button {
+                text: "載入";
+                kind: ButtonKind.primary;
+                enabled: root.engine.state != "loading" && !AppState.busy;
+                clicked => { AppState.load-engine(root.engine.id); }
+            }
+            if root.loaded: Button {
+                text: "卸載";
+                enabled: !AppState.busy;
+                clicked => { AppState.unload-engine(); }
+            }
+            if root.installed: Button {
+                text: "重新安裝";
+                kind: ButtonKind.quiet;
+                clicked => { AppState.install-engine(root.engine.id); }
+            }
+            Button {
+                text: "查看記錄";
+                kind: ButtonKind.quiet;
+                clicked => { AppState.open-engine-log(root.engine.id); }
+            }
+        }
+    }
+}
+
+export component EnginesPage inherits Rectangle {
+    background: Theme.window;
+    VerticalLayout {
+        padding: 6px;
+        spacing: 6px;
+        Rectangle {
+            height: 40px;
+            background: Theme.panel;
+            border-width: 1px;
+            border-color: Theme.line;
+            HorizontalLayout {
+                padding-left: 12px;
+                padding-right: 8px;
+                spacing: 10px;
+                Text {
+                    text: AppState.gpu-note;
+                    color: Theme.text-dim;
+                    font-size: Theme.font-body;
+                    vertical-alignment: center;
+                    horizontal-stretch: 1;
+                    wrap: word-wrap;
+                }
+                VerticalLayout {
+                    alignment: center;
+                    Button { text: "重新整理"; clicked => { AppState.refresh-engines(); } }
+                }
+            }
+        }
+        ScrollView {
+            vertical-stretch: 1;
+            VerticalLayout {
+                spacing: 6px;
+                alignment: start;
+                for e in AppState.engines: EngineCard {
+                    engine: e;
+                    min-height: 200px;
+                }
+            }
+        }
+    }
+}

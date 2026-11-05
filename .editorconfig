@@ -1,0 +1,11 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+# Windows PowerShell 5.1 會用系統字碼頁（繁中 Windows 是 CP950）讀沒有 BOM 的腳本，中文會變亂碼。
+[*.ps1]
+charset = utf-8-bom
+end_of_line = crlf

@@ -1,0 +1,123 @@
+import { ScrollView } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+import { AppState, ExportItem } from "../state.slint";
+import { Panel, PanelHeader, Button, ButtonKind, FieldLabel, Divider, Slider, Toggle } from "../widgets.slint";
+
+component ExportSettings inherits Panel {
+    PanelHeader { title: "輸出設定"; detail: AppState.project-name; }
+    VerticalLayout {
+        padding: Theme.pad;
+        spacing: 10px;
+        alignment: start;
+        vertical-stretch: 1;
+        Text {
+            text: "把時間軸上的片段依序接成一個 WAV 檔。不同引擎的取樣率會自動統一。";
+            color: Theme.text-dim;
+            font-size: Theme.font-body;
+            wrap: word-wrap;
+        }
+        Divider { }
+        FieldLabel { text: "片段間隔 " + round(AppState.export-gap * 100) / 100 + " 秒"; }
+        Slider {
+            minimum: 0;
+            maximum: 2;
+            value <=> AppState.export-gap;
+        }
+        HorizontalLayout {
+            spacing: 8px;
+            Text {
+                text: "響度正規化";
+                color: Theme.text;
+                font-size: Theme.font-body;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+            }
+            VerticalLayout {
+                alignment: center;
+                Toggle { checked <=> AppState.export-normalize; }
+            }
+        }
+        FieldLabel {
+            text: "目標響度 " + round(AppState.export-lufs) + " LUFS（Podcast 常用 -16，YouTube 約 -14）";
+        }
+        Slider {
+            enabled: AppState.export-normalize;
+            minimum: -24;
+            maximum: -10;
+            value <=> AppState.export-lufs;
+        }
+        Divider { }
+        HorizontalLayout {
+            spacing: 6px;
+            Button {
+                text: "匯出 WAV";
+                kind: ButtonKind.primary;
+                height: 30px;
+                enabled: AppState.clips.length > 0 && !AppState.busy;
+                clicked => { AppState.export-project(); }
+            }
+            Button { text: "開啟輸出資料夾"; height: 30px; clicked => { AppState.open-output-dir(); } }
+        }
+        Text {
+            text: "輸出資料夾：" + AppState.output-dir;
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+    }
+}
+
+component ExportRow inherits Rectangle {
+    in property <ExportItem> item;
+    height: 46px;
+    background: ta.has-hover ? Theme.hover : transparent;
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 8px;
+        spacing: 8px;
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text { text: root.item.name; color: Theme.text; font-size: Theme.font-body; overflow: elide; }
+            Text { text: root.item.detail; color: Theme.text-faint; font-size: Theme.font-small; overflow: elide; }
+        }
+        VerticalLayout {
+            alignment: center;
+            Button {
+                text: "在資料夾中顯示";
+                kind: ButtonKind.quiet;
+                clicked => { AppState.reveal(root.item.path); }
+            }
+        }
+    }
+    ta := TouchArea { }
+}
+
+component ExportList inherits Panel {
+    PanelHeader { title: "這次開啟後的匯出"; }
+    ScrollView {
+        vertical-stretch: 1;
+        VerticalLayout {
+            alignment: start;
+            for e in AppState.exports: ExportRow { item: e; }
+            if AppState.exports.length == 0: Text {
+                height: 120px;
+                text: "還沒有匯出。調好左邊的設定後按「匯出 WAV」。";
+                color: Theme.text-faint;
+                font-size: Theme.font-body;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+    }
+}
+
+export component DeliverPage inherits Rectangle {
+    background: Theme.window;
+    HorizontalLayout {
+        padding: 6px;
+        spacing: 6px;
+        ExportSettings { width: 380px; }
+        ExportList { horizontal-stretch: 1; }
+    }
+}

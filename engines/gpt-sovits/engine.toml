@@ -1,0 +1,17 @@
+id = "gpt-sovits"
+name = "GPT-SoVITS"
+vendor = "RVC-Boss（開源社群）"
+summary = "3–10 秒參考音即可複製聲音，也能匯入自己訓練的角色模型；日文表現好"
+license = "MIT，可商用（產生的聲音由使用者負責）"
+license_url = "https://github.com/RVC-Boss/GPT-SoVITS/blob/main/LICENSE"
+homepage = "https://github.com/RVC-Boss/GPT-SoVITS"
+min_vram_gb = 4.0
+sample_rate = 32000
+languages = ["ja", "zh", "en", "ko", "yue"]
+chunk_chars = 120
+order = 2
+
+[capabilities]
+clone = true
+speed = true
+trained_models = true

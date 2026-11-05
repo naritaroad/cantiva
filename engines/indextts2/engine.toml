@@ -1,0 +1,17 @@
+id = "indextts2"
+name = "IndexTTS 2.5"
+vendor = "bilibili Index 團隊"
+summary = "情緒控制最細：可給情緒參考音檔、八維情緒向量或一句情緒描述"
+license = "bilibili 模型使用協議：月活躍使用者 1 億以上或年營收人民幣 10 億以上需另外授權"
+license_url = "https://github.com/index-tts/index-tts/blob/main/LICENSE"
+homepage = "https://github.com/index-tts/index-tts"
+min_vram_gb = 6.0
+sample_rate = 22050
+languages = ["zh", "en", "ja", "es", "ar"]
+chunk_chars = 120
+order = 4
+
+[capabilities]
+clone = true
+emotion = true
+speed = true

@@ -1,0 +1,295 @@
+import { LineEdit, TextEdit, ComboBox, ScrollView } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+import { AppState, VoiceItem } from "../state.slint";
+import { Panel, PanelHeader, Button, ButtonKind, FieldLabel, Divider, Tag, InfoRow } from "../widgets.slint";
+
+component VoiceRow inherits Rectangle {
+    in property <VoiceItem> voice;
+    in property <bool> selected;
+    callback clicked();
+    height: 44px;
+    background: root.selected ? Theme.accent-dim : ta.has-hover ? Theme.hover : transparent;
+    Rectangle {
+        x: 0;
+        width: 2px;
+        background: root.selected ? Theme.accent : transparent;
+    }
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 10px;
+        spacing: 10px;
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text {
+                text: root.voice.name;
+                color: Theme.text;
+                font-size: Theme.font-body;
+                overflow: elide;
+            }
+            Text {
+                text: root.voice.description;
+                color: Theme.text-faint;
+                font-size: Theme.font-small;
+                overflow: elide;
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            Tag {
+                text: root.voice.source == "library" ? "複製" : "內建";
+                tint: root.voice.source == "library" ? Theme.accent : Theme.text-dim;
+            }
+        }
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+component VoiceList inherits Panel {
+    PanelHeader {
+        title: "聲音";
+        detail: AppState.voices.length + " 個";
+    }
+    ScrollView {
+        vertical-stretch: 1;
+        VerticalLayout {
+            alignment: start;
+            for v in AppState.voices: VoiceRow {
+                voice: v;
+                selected: v.name == AppState.selected-voice;
+                clicked => { AppState.selected-voice = v.name; }
+            }
+        }
+    }
+}
+
+component VoiceDetail inherits Panel {
+    PanelHeader { title: "聲音資訊"; }
+    for v in AppState.voices: VerticalLayout {
+        visible: v.name == AppState.selected-voice;
+        height: v.name == AppState.selected-voice ? self.preferred-height : 0;
+        padding: Theme.pad;
+        spacing: 8px;
+        Text {
+            text: v.name;
+            color: Theme.text;
+            font-size: Theme.font-title;
+            font-weight: 600;
+        }
+        Text {
+            text: v.description;
+            color: Theme.text-dim;
+            font-size: Theme.font-body;
+            wrap: word-wrap;
+        }
+        VerticalLayout {
+            spacing: 5px;
+            InfoRow { label: "引擎"; value: v.engine; label-width: 40px; }
+            InfoRow { label: "語言"; value: v.language == "" ? "依參考音檔" : v.language; label-width: 40px; }
+        }
+        HorizontalLayout {
+            spacing: 6px;
+            alignment: start;
+            Button {
+                text: "試聽";
+                enabled: !AppState.busy;
+                clicked => { AppState.preview-voice(v.name); }
+            }
+            if v.source == "library": Button {
+                text: "刪除聲音";
+                kind: ButtonKind.danger;
+                clicked => { AppState.delete-voice(v.name); }
+            }
+        }
+    }
+    if AppState.selected-voice == "": Text {
+        vertical-stretch: 1;
+        text: "從左邊選一個聲音。";
+        color: Theme.text-faint;
+        font-size: Theme.font-body;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    Rectangle { vertical-stretch: 1; }
+}
+
+component ConsentOption inherits Rectangle {
+    in property <string> text;
+    in property <bool> checked;
+    callback clicked();
+    height: 26px;
+    HorizontalLayout {
+        spacing: 8px;
+        Rectangle {
+            width: 14px;
+            height: 14px;
+            y: 6px;
+            border-radius: 7px;
+            border-width: 1px;
+            border-color: root.checked ? Theme.accent : Theme.line-strong;
+            Rectangle {
+                width: 6px;
+                height: 6px;
+                border-radius: 3px;
+                background: Theme.accent;
+                visible: root.checked;
+            }
+        }
+        Text {
+            text: root.text;
+            color: Theme.text;
+            font-size: Theme.font-body;
+            vertical-alignment: center;
+        }
+    }
+    TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+component CreateVoice inherits Panel {
+    PanelHeader { title: "用參考音檔建立聲音"; }
+    ScrollView {
+        vertical-stretch: 1;
+        VerticalLayout {
+            padding: Theme.pad;
+            spacing: 6px;
+            Text {
+                text: "準備一段 3–15 秒、背景安靜的人聲 WAV 檔，並寫下音檔裡實際說的每個字。";
+                color: Theme.text-dim;
+                font-size: Theme.font-body;
+                wrap: word-wrap;
+            }
+            FieldLabel { text: "名稱"; }
+            LineEdit {
+                placeholder-text: "例如：我的旁白";
+                text <=> AppState.new-voice-name;
+            }
+            FieldLabel { text: "用哪個引擎複製"; }
+            ComboBox {
+                model: AppState.clone-engines;
+                current-index <=> AppState.new-voice-engine-index;
+                selected => { AppState.voice-engine-changed(self.current-index); }
+            }
+            FieldLabel { text: "參考音檔"; }
+            HorizontalLayout {
+                spacing: 6px;
+                Rectangle {
+                    horizontal-stretch: 1;
+                    height: 24px;
+                    background: Theme.raised;
+                    border-radius: Theme.radius;
+                    Text {
+                        x: 8px;
+                        width: parent.width - 16px;
+                        text: AppState.new-voice-file == "" ? "尚未選擇" : AppState.new-voice-file;
+                        color: AppState.new-voice-file == "" ? Theme.text-faint : Theme.text;
+                        font-size: Theme.font-small;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+                }
+                Button { text: "選擇檔案"; clicked => { AppState.pick-reference(); } }
+            }
+            FieldLabel { text: "逐字稿"; }
+            TextEdit {
+                height: 70px;
+                text <=> AppState.new-voice-transcript;
+            }
+            FieldLabel { text: "參考音檔的語言"; }
+            ComboBox {
+                model: ["自動判斷", "中文", "日文", "英文", "韓文", "粵語"];
+                current-index <=> AppState.new-voice-language-index;
+            }
+            if AppState.new-voice-trained-supported: VerticalLayout {
+                spacing: 6px;
+                Divider { }
+                FieldLabel { text: "角色模型（選填，GPT-SoVITS 訓練產生的兩個檔案）"; }
+                HorizontalLayout {
+                    spacing: 6px;
+                    Text {
+                        horizontal-stretch: 1;
+                        text: AppState.new-voice-gpt-file == "" ? "GPT 權重 .ckpt" : AppState.new-voice-gpt-file;
+                        color: AppState.new-voice-gpt-file == "" ? Theme.text-faint : Theme.text;
+                        font-size: Theme.font-small;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+                    Button { text: "選擇"; clicked => { AppState.pick-gpt-weights(); } }
+                }
+                HorizontalLayout {
+                    spacing: 6px;
+                    Text {
+                        horizontal-stretch: 1;
+                        text: AppState.new-voice-sovits-file == "" ? "SoVITS 權重 .pth" : AppState.new-voice-sovits-file;
+                        color: AppState.new-voice-sovits-file == "" ? Theme.text-faint : Theme.text;
+                        font-size: Theme.font-small;
+                        vertical-alignment: center;
+                        overflow: elide;
+                    }
+                    Button { text: "選擇"; clicked => { AppState.pick-sovits-weights(); } }
+                }
+                if AppState.new-voice-gpt-file != "" || AppState.new-voice-sovits-file != "": Button {
+                    text: "不使用角色模型";
+                    kind: ButtonKind.quiet;
+                    clicked => { AppState.clear-trained-weights(); }
+                }
+                Text {
+                    text: "沒有角色模型時，GPT-SoVITS 只用參考音檔零樣本複製。參考音檔建議 3–10 秒。";
+                    color: Theme.text-faint;
+                    font-size: Theme.font-small;
+                    wrap: word-wrap;
+                }
+            }
+            FieldLabel { text: "同意依據（必填）"; }
+            ConsentOption {
+                text: "這是我本人的聲音";
+                checked: AppState.new-voice-consent == 0;
+                clicked => { AppState.new-voice-consent = 0; }
+            }
+            ConsentOption {
+                text: "聲音主人已書面或錄音同意";
+                checked: AppState.new-voice-consent == 1;
+                clicked => { AppState.new-voice-consent = 1; }
+            }
+            ConsentOption {
+                text: "有授權可複製的素材";
+                checked: AppState.new-voice-consent == 2;
+                clicked => { AppState.new-voice-consent = 2; }
+            }
+            LineEdit {
+                placeholder-text: "說明：誰在何時同意，例如「王小明 2026/11/05 書面同意」";
+                text <=> AppState.new-voice-statement;
+            }
+            Text {
+                text: "冒用他人聲音詐欺觸犯刑法第 339 條之 4。同意紀錄只存在這台電腦。";
+                color: Theme.text-faint;
+                font-size: Theme.font-small;
+                wrap: word-wrap;
+            }
+            Button {
+                text: "建立聲音";
+                kind: ButtonKind.primary;
+                height: 28px;
+                enabled: AppState.new-voice-name != "" && AppState.new-voice-file != "" && AppState.new-voice-transcript != ""
+                    && AppState.new-voice-consent >= 0 && AppState.new-voice-statement != "";
+                clicked => { AppState.create-voice(); }
+            }
+        }
+    }
+}
+
+export component VoicesPage inherits Rectangle {
+    background: Theme.window;
+    HorizontalLayout {
+        padding: 6px;
+        spacing: 6px;
+        VoiceList { width: 320px; }
+        VoiceDetail { horizontal-stretch: 1; }
+        CreateVoice { width: 340px; }
+    }
+}

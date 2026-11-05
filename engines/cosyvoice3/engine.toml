@@ -1,0 +1,17 @@
+id = "cosyvoice3"
+name = "Fun-CosyVoice 3"
+vendor = "阿里巴巴通義實驗室"
+summary = "零樣本複製聲音，支援跨語言與多種中文方言，可用指令調整語氣"
+license = "Apache-2.0，可商用"
+license_url = "https://github.com/FunAudioLLM/CosyVoice/blob/main/LICENSE"
+homepage = "https://github.com/FunAudioLLM/CosyVoice"
+min_vram_gb = 5.0
+sample_rate = 24000
+languages = ["zh", "en", "ja", "ko", "de", "es", "fr", "it", "ru", "yue"]
+chunk_chars = 150
+order = 3
+
+[capabilities]
+clone = true
+instruct = true
+speed = true

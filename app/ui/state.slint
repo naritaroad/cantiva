@@ -1,0 +1,198 @@
+// 介面狀態與回呼。Rust 端透過 ui.global::<AppState>() 讀寫，各頁面直接引用。
+
+export struct VoiceItem {
+    name: string,
+    engine: string,
+    // "library" 或 "builtin"
+    source: string,
+    language: string,
+    description: string,
+}
+
+export struct EngineItem {
+    id: string,
+    name: string,
+    vendor: string,
+    summary: string,
+    license: string,
+    vram: string,
+    // not_installed / idle / loading / ready / busy / failed
+    state: string,
+    state-label: string,
+    error: string,
+    features: string,
+    languages: string,
+    voice-count: int,
+}
+
+export struct ScriptLineItem {
+    index: int,
+    voice: string,
+    instruct: string,
+    text: string,
+    seconds: string,
+}
+
+export struct TrackItem {
+    name: string,
+    color: color,
+}
+
+export struct ClipItem {
+    id: string,
+    track: int,
+    start: float,
+    duration: float,
+    text: string,
+    voice: string,
+    engine: string,
+    lufs: string,
+    path: string,
+    starred: bool,
+    wave: image,
+    color: color,
+}
+
+export struct ClientConfig {
+    client: string,
+    location: string,
+    snippet: string,
+    note: string,
+}
+
+export struct ExportItem {
+    name: string,
+    path: string,
+    detail: string,
+}
+
+export global AppState {
+    // 0 聲音庫、1 腳本、2 時間軸、3 輸出、4 引擎、5 連線
+    in-out property <int> page: 1;
+
+    // ---- 專案 ----
+    in property <[string]> projects;
+    in-out property <int> project-index;
+    in property <string> project-name;
+    callback select-project(int);
+    callback create-project(string);
+
+    // ---- 工作狀態（頂部列）----
+    in property <bool> busy;
+    in property <string> job-label;
+    in property <float> job-progress;
+    in property <string> engine-summary: "沒有載入模型";
+    in property <string> engine-state: "idle";
+    in property <string> toast;
+    in property <bool> toast-error;
+    callback dismiss-toast();
+    callback show-about();
+
+    // ---- 聲音 ----
+    in property <[VoiceItem]> voices;
+    in property <[string]> voice-names;
+    in property <[string]> library-voice-names;
+
+    // ---- 腳本頁 ----
+    in-out property <string> script-text;
+    in property <[ScriptLineItem]> script-lines;
+    in property <string> script-summary;
+    in-out property <int> default-voice-index;
+    callback script-edited(string);
+    callback render-script();
+    callback render-line(int);
+
+    // 快速合成
+    in-out property <string> quick-text;
+    in-out property <int> quick-voice-index;
+    in-out property <string> quick-instruct;
+    in-out property <int> quick-emotion-index;
+    in-out property <float> quick-emotion-strength: 0.6;
+    in-out property <float> quick-speed: 1.0;
+    in-out property <string> quick-seed;
+    in property <string> quick-hint;
+    callback quick-voice-changed(int);
+    callback quick-speak();
+
+    // ---- 時間軸 ----
+    in property <[TrackItem]> tracks;
+    in property <[ClipItem]> clips;
+    in property <float> total-seconds;
+    in property <float> playhead;
+    in property <bool> playing;
+    in property <string> timecode: "00:00:00.00";
+    in property <string> duration-code: "00:00:00.00";
+    in property <float> meter-level;
+    in property <float> meter-peak;
+    in-out property <float> zoom: 48.0;
+    in-out property <string> selected-clip;
+    callback select-clip(string);
+    callback play-pause();
+    callback stop();
+    callback seek(float);
+    callback to-start();
+    callback to-end();
+    callback move-clip(int);
+    callback remove-clip();
+    callback regenerate-clip();
+    callback star-clip(bool);
+    callback open-clip-folder();
+
+    // ---- 聲音庫 ----
+    in-out property <string> new-voice-name;
+    in-out property <int> new-voice-engine-index;
+    in property <[string]> clone-engines;
+    in property <[string]> clone-engine-ids;
+    in property <string> new-voice-file;
+    in-out property <string> new-voice-transcript;
+    in-out property <int> new-voice-consent: -1;
+    in-out property <string> new-voice-statement;
+    in-out property <string> selected-voice;
+    // 參考音檔的語言（GPT-SoVITS 需要）：自動、中文、日文、英文、韓文、粵語
+    in-out property <int> new-voice-language-index;
+    // 目前選的引擎能不能匯入角色模型（GPT-SoVITS）
+    in property <bool> new-voice-trained-supported;
+    in property <string> new-voice-gpt-file;
+    in property <string> new-voice-sovits-file;
+    callback voice-engine-changed(int);
+    callback pick-gpt-weights();
+    callback pick-sovits-weights();
+    callback clear-trained-weights();
+    callback pick-reference();
+    callback create-voice();
+    callback delete-voice(string);
+    callback preview-voice(string);
+
+    // ---- 輸出頁 ----
+    in-out property <float> export-gap: 0.4;
+    in-out property <bool> export-normalize: true;
+    in-out property <float> export-lufs: -16.0;
+    in property <[ExportItem]> exports;
+    in property <string> output-dir;
+    callback export-project();
+    callback open-output-dir();
+    callback reveal(string);
+
+    // ---- 引擎頁 ----
+    in property <[EngineItem]> engines;
+    in property <string> gpu-note;
+    callback install-engine(string);
+    callback load-engine(string);
+    callback unload-engine();
+    callback open-engine-log(string);
+    callback refresh-engines();
+
+    // ---- 連線頁 ----
+    in property <string> api-status;
+    in property <string> mcp-path;
+    in property <[ClientConfig]> client-configs;
+    in-out property <bool> tunnel-running;
+    in property <string> tunnel-status: "已關閉";
+    in property <string> tunnel-url;
+    in property <bool> tunnel-available;
+    in-out property <bool> tunnel-allow-clone;
+    callback copy-text(string);
+    callback toggle-tunnel(bool);
+    callback tunnel-clone-changed(bool);
+    callback install-skill();
+}

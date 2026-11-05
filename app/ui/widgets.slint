@@ -1,0 +1,336 @@
+// 共用元件：面板、按鈕、標籤、狀態燈、圖示。刻意不用 std-widgets 的按鈕，
+// 才能做出專業剪輯軟體那種低調、密集的控制項。
+
+import { Theme } from "theme.slint";
+
+// 面板外框：深色底與細邊框，內容由子元件決定（通常是 PanelHeader + 內容）。
+export component Panel inherits Rectangle {
+    background: Theme.panel;
+    border-width: 1px;
+    border-color: Theme.line;
+    clip: true;
+    VerticalLayout {
+        padding: 1px;
+        spacing: 0;
+        @children
+    }
+}
+
+// 面板標題列：左邊是標題，子元件（工具按鈕）放在右邊。
+export component PanelHeader inherits Rectangle {
+    in property <string> title;
+    in property <string> detail;
+    height: Theme.header-height;
+    background: Theme.header;
+    HorizontalLayout {
+        padding-left: 10px;
+        padding-right: 4px;
+        spacing: 6px;
+        alignment: stretch;
+        Text {
+            text: root.title;
+            color: Theme.text;
+            font-size: Theme.font-small;
+            font-weight: 600;
+            vertical-alignment: center;
+        }
+        Text {
+            text: root.detail;
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+        }
+        @children
+    }
+}
+
+export enum ButtonKind { normal, primary, quiet, danger }
+
+export component Button inherits Rectangle {
+    in property <string> text;
+    in property <ButtonKind> kind: normal;
+    in property <bool> enabled: true;
+    in property <string> tooltip;
+    callback clicked();
+    min-width: label.preferred-width + 20px;
+    height: 24px;
+    border-radius: Theme.radius;
+    background: !root.enabled ? Theme.raised.darker(0.1)
+        : root.kind == ButtonKind.primary ? (ta.pressed ? Theme.accent.darker(0.2) : ta.has-hover ? Theme.accent.brighter(0.1) : Theme.accent)
+        : root.kind == ButtonKind.quiet ? (ta.has-hover ? Theme.hover : transparent)
+        : (ta.pressed ? Theme.line : ta.has-hover ? Theme.hover : Theme.raised);
+    border-width: root.kind == ButtonKind.normal || root.kind == ButtonKind.danger ? 1px : 0;
+    border-color: root.kind == ButtonKind.danger ? Theme.danger.transparentize(0.4) : Theme.line-strong;
+    label := Text {
+        text: root.text;
+        font-size: Theme.font-body;
+        font-weight: root.kind == ButtonKind.primary ? 600 : 400;
+        color: !root.enabled ? Theme.text-faint
+            : root.kind == ButtonKind.primary ? Theme.on-accent
+            : root.kind == ButtonKind.danger ? Theme.danger
+            : Theme.text;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: root.enabled ? pointer : default;
+        clicked => { root.clicked(); }
+    }
+    focus-ring := Rectangle {
+        border-radius: Theme.radius;
+        border-width: fs.has-focus ? 1px : 0;
+        border-color: Theme.accent;
+    }
+    fs := FocusScope {
+        enabled: root.enabled;
+        key-pressed(e) => {
+            if (e.text == " " || e.text == "\n") {
+                root.clicked();
+                return accept;
+            }
+            reject
+        }
+    }
+}
+
+// 小型分類標籤，例如「可商用」「複製聲音」。
+export component Tag inherits Rectangle {
+    in property <string> text;
+    in property <color> tint: Theme.text-dim;
+    height: 18px;
+    min-width: t.preferred-width + 12px;
+    border-radius: 2px;
+    background: root.tint.transparentize(0.85);
+    t := Text {
+        text: root.text;
+        color: root.tint;
+        font-size: Theme.font-small;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+// 狀態燈：引擎載入中、就緒、失敗。
+export component StatusDot inherits Rectangle {
+    in property <color> tint: Theme.text-faint;
+    in property <bool> pulse: false;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: root.tint;
+    opacity: root.pulse ? (0.45 + 0.55 * abs(sin(animation-tick() / 1000ms * 180deg))) : 1.0;
+}
+
+// 欄位標籤：放在輸入框上方。
+export component FieldLabel inherits Text {
+    color: Theme.text-dim;
+    font-size: Theme.font-small;
+}
+
+// 水平分隔線。
+export component Divider inherits Rectangle {
+    height: 1px;
+    background: Theme.line;
+}
+
+// 簡單的向量圖示。commands 用 24×24 的 SVG path。
+export component Icon inherits Path {
+    in property <color> tint: Theme.text-dim;
+    width: 18px;
+    height: 18px;
+    viewbox-width: 24;
+    viewbox-height: 24;
+    stroke: root.tint;
+    stroke-width: 1.6px;
+    fill: transparent;
+}
+
+// 頁面圖示的 path（24×24 座標）。
+export global Icons {
+    // 聲音庫：麥克風
+    out property <string> voices: "M12 3 a3 3 0 0 1 3 3 v6 a3 3 0 0 1 -6 0 v-6 a3 3 0 0 1 3 -3 Z M6 11 a6 6 0 0 0 12 0 M12 17 v4 M9 21 h6";
+    // 腳本：文件
+    out property <string> script: "M6 3 h9 l4 4 v14 h-13 Z M15 3 v4 h4 M9 11 h7 M9 14 h7 M9 17 h5";
+    // 時間軸：軌道
+    out property <string> timeline: "M3 6 h18 M3 12 h18 M3 18 h18 M7 4 v4 M14 10 v4 M10 16 v4";
+    // 輸出：箭頭向外
+    out property <string> deliver: "M12 3 v12 M7 10 l5 5 l5 -5 M4 17 v3 h16 v-3";
+    // 引擎：晶片
+    out property <string> engines: "M7 7 h10 v10 h-10 Z M10 3 v4 M14 3 v4 M10 17 v4 M14 17 v4 M3 10 h4 M3 14 h4 M17 10 h4 M17 14 h4";
+    // 連線：節點
+    out property <string> connect: "M6 12 a2.5 2.5 0 1 0 0.01 0 Z M18 6 a2.5 2.5 0 1 0 0.01 0 Z M18 18 a2.5 2.5 0 1 0 0.01 0 Z M8.2 10.9 l7.6 -3.8 M8.2 13.1 l7.6 3.8";
+    out property <string> play: "M8 5 l11 7 l-11 7 Z";
+    out property <string> pause: "M8 5 v14 M16 5 v14";
+    out property <string> stop: "M7 7 h10 v10 h-10 Z";
+    out property <string> to-start: "M6 5 v14 M18 5 l-10 7 l10 7 Z";
+    out property <string> to-end: "M18 5 v14 M6 5 l10 7 l-10 7 Z";
+    out property <string> folder: "M3 7 h6 l2 2 h10 v10 h-18 Z";
+    out property <string> star: "M12 3 l2.7 5.6 l6.1 0.9 l-4.4 4.3 l1 6.1 l-5.4 -2.9 l-5.4 2.9 l1 -6.1 l-4.4 -4.3 l6.1 -0.9 Z";
+}
+
+// 有圖示的方形按鈕（播放控制、工具列）。
+export component IconButton inherits Rectangle {
+    in property <string> icon;
+    in property <bool> active: false;
+    in property <bool> enabled: true;
+    in property <length> size: 28px;
+    callback clicked();
+    width: root.size;
+    height: root.size;
+    border-radius: Theme.radius;
+    background: root.active ? Theme.accent-dim : ta.has-hover && root.enabled ? Theme.hover : transparent;
+    Icon {
+        commands: root.icon;
+        tint: !root.enabled ? Theme.text-faint : root.active ? Theme.accent : ta.has-hover ? Theme.text : Theme.text-dim;
+        width: root.size * 0.64;
+        height: root.size * 0.64;
+    }
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+// 滑桿：自己畫，才能用琥珀強調色（std-widgets 的 fluent 滑桿固定是藍色）。
+export component Slider inherits Rectangle {
+    in property <float> minimum: 0;
+    in property <float> maximum: 1;
+    in-out property <float> value;
+    in property <bool> enabled: true;
+    callback changed(float);
+    property <float> ratio: root.maximum > root.minimum ? (root.value - root.minimum) / (root.maximum - root.minimum) : 0;
+    height: 20px;
+    min-width: 60px;
+    function set-from(x: length) {
+        root.value = max(root.minimum, min(root.maximum, root.minimum + (x / root.width) * (root.maximum - root.minimum)));
+        root.changed(root.value);
+    }
+    function nudge(step: float) {
+        root.value = max(root.minimum, min(root.maximum, root.value + step * (root.maximum - root.minimum)));
+        root.changed(root.value);
+    }
+    Rectangle {
+        y: (parent.height - 3px) / 2;
+        height: 3px;
+        border-radius: 1.5px;
+        background: Theme.line-strong;
+    }
+    Rectangle {
+        x: 0;
+        y: (parent.height - 3px) / 2;
+        width: parent.width * root.ratio;
+        height: 3px;
+        border-radius: 1.5px;
+        background: root.enabled ? Theme.accent : Theme.text-faint;
+    }
+    Rectangle {
+        x: parent.width * root.ratio - 6px;
+        y: (parent.height - 12px) / 2;
+        width: 12px;
+        height: 12px;
+        border-radius: 6px;
+        background: !root.enabled ? Theme.text-faint : ta.pressed || ta.has-hover ? Theme.text : #c8c8cc;
+        border-width: fs.has-focus ? 2px : 0;
+        border-color: Theme.accent;
+    }
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        pointer-event(e) => {
+            if (e.kind == PointerEventKind.down) {
+                fs.focus();
+                root.set-from(self.mouse-x);
+            }
+        }
+        moved => {
+            if (self.pressed) {
+                root.set-from(self.mouse-x);
+            }
+        }
+    }
+    fs := FocusScope {
+        enabled: root.enabled;
+        key-pressed(e) => {
+            if (e.text == Key.LeftArrow || e.text == Key.DownArrow) {
+                root.nudge(-0.02);
+                return accept;
+            }
+            if (e.text == Key.RightArrow || e.text == Key.UpArrow) {
+                root.nudge(0.02);
+                return accept;
+            }
+            reject
+        }
+    }
+}
+
+// 兩欄的「標籤：值」列，標籤欄固定寬度。
+export component InfoRow inherits HorizontalLayout {
+    in property <string> label;
+    in property <string> value;
+    in property <length> label-width: 72px;
+    in property <bool> dim: false;
+    spacing: 8px;
+    Text {
+        width: root.label-width;
+        text: root.label;
+        color: Theme.text-dim;
+        font-size: Theme.font-small;
+    }
+    Text {
+        horizontal-stretch: 1;
+        text: root.value;
+        color: root.dim ? Theme.text-dim : Theme.text;
+        font-size: root.dim ? Theme.font-small : Theme.font-body;
+        wrap: word-wrap;
+    }
+}
+
+// 開關：琥珀色，和其他強調色一致（std-widgets 的 Switch 固定是藍色）。
+export component Toggle inherits Rectangle {
+    in-out property <bool> checked;
+    in property <bool> enabled: true;
+    callback toggled(bool);
+    width: 34px;
+    height: 18px;
+    border-radius: 9px;
+    background: !root.enabled ? Theme.raised : root.checked ? Theme.accent : Theme.line-strong;
+    animate background { duration: 120ms; }
+    Rectangle {
+        x: root.checked ? parent.width - 16px : 2px;
+        y: 2px;
+        width: 14px;
+        height: 14px;
+        border-radius: 7px;
+        background: root.enabled ? #f2f2f4 : Theme.text-faint;
+        animate x { duration: 120ms; easing: ease-out; }
+    }
+    Rectangle {
+        border-radius: 9px;
+        border-width: fs.has-focus ? 1px : 0;
+        border-color: Theme.text;
+    }
+    TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        clicked => {
+            root.checked = !root.checked;
+            root.toggled(root.checked);
+        }
+    }
+    fs := FocusScope {
+        enabled: root.enabled;
+        key-pressed(e) => {
+            if (e.text == " " || e.text == "\n") {
+                root.checked = !root.checked;
+                root.toggled(root.checked);
+                return accept;
+            }
+            reject
+        }
+    }
+}

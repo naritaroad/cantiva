@@ -1,0 +1,376 @@
+import { ScrollView } from "std-widgets.slint";
+import { Theme } from "../theme.slint";
+import { AppState, ClipItem } from "../state.slint";
+import { Panel, PanelHeader, Button, ButtonKind, FieldLabel, Divider, IconButton, Icons, Tag, Slider, InfoRow } from "../widgets.slint";
+
+// 垂直音量表：綠、黃、紅三段，峰值保持線。
+component Meter inherits Rectangle {
+    in property <float> level;
+    in property <float> peak;
+    width: 10px;
+    background: #0e0e10;
+    border-width: 1px;
+    border-color: Theme.line;
+    Rectangle {
+        y: parent.height * (1 - min(1, root.level));
+        height: parent.height * min(1, root.level);
+        width: parent.width - 2px;
+        x: 1px;
+        background: @linear-gradient(0deg, Theme.ok 0%, Theme.ok 65%, Theme.warn 82%, Theme.danger 100%);
+    }
+    Rectangle {
+        y: parent.height * (1 - min(1, root.peak));
+        height: 2px;
+        width: parent.width - 2px;
+        x: 1px;
+        background: root.peak > 0.92 ? Theme.danger : Theme.text;
+        visible: root.peak > 0.01;
+    }
+}
+
+component Transport inherits Rectangle {
+    height: 64px;
+    background: Theme.panel;
+    border-width: 1px;
+    border-color: Theme.line;
+    HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 14px;
+        spacing: 14px;
+        VerticalLayout {
+            alignment: center;
+            spacing: 0;
+            Text {
+                text: AppState.timecode;
+                font-family: Theme.mono-family;
+                font-size: 24px;
+                color: AppState.playing ? Theme.accent : Theme.text;
+            }
+            Text {
+                text: "總長 " + AppState.duration-code;
+                font-family: Theme.mono-family;
+                font-size: Theme.font-small;
+                color: Theme.text-faint;
+            }
+        }
+        Rectangle { horizontal-stretch: 1; }
+        HorizontalLayout {
+            alignment: center;
+            spacing: 4px;
+            IconButton { icon: Icons.to-start; clicked => { AppState.to-start(); } }
+            IconButton { icon: Icons.stop; clicked => { AppState.stop(); } }
+            IconButton {
+                icon: AppState.playing ? Icons.pause : Icons.play;
+                active: AppState.playing;
+                size: 36px;
+                enabled: AppState.clips.length > 0;
+                clicked => { AppState.play-pause(); }
+            }
+            IconButton { icon: Icons.to-end; clicked => { AppState.to-end(); } }
+        }
+        Rectangle { horizontal-stretch: 1; }
+        VerticalLayout {
+            alignment: center;
+            width: 160px;
+            FieldLabel { text: "縮放"; }
+            Slider {
+                minimum: 8;
+                maximum: 240;
+                value <=> AppState.zoom;
+            }
+        }
+        HorizontalLayout {
+            padding-top: 8px;
+            padding-bottom: 8px;
+            spacing: 2px;
+            Meter { level: AppState.meter-level; peak: AppState.meter-peak; }
+            Meter { level: AppState.meter-level * 0.97; peak: AppState.meter-peak; }
+        }
+    }
+}
+
+component Clip inherits Rectangle {
+    in property <ClipItem> item;
+    in property <bool> selected;
+    in property <length> px-per-sec;
+    callback clicked();
+    x: root.item.start * root.px-per-sec;
+    width: max(4px, root.item.duration * root.px-per-sec);
+    border-radius: 2px;
+    background: root.item.color.darker(0.35);
+    border-width: root.selected ? 2px : 1px;
+    border-color: root.selected ? Theme.accent : root.item.color.brighter(0.2);
+    clip: true;
+    Rectangle {
+        height: 16px;
+        y: 0;
+        background: root.item.color.darker(0.1);
+        Text {
+            x: 5px;
+            width: parent.width - 10px;
+            text: (root.item.starred ? "★ " : "") + root.item.text;
+            color: #f2f2f4;
+            font-size: Theme.font-small;
+            vertical-alignment: center;
+            overflow: elide;
+        }
+    }
+    Image {
+        y: 16px;
+        height: parent.height - 16px;
+        width: parent.width;
+        source: root.item.wave;
+        image-fit: fill;
+        colorize: root.item.color.brighter(0.6);
+    }
+    TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+component Tracks inherits Rectangle {
+    property <length> row-h: 64px;
+    property <length> ruler-h: 22px;
+    property <length> head-w: 150px;
+    property <length> px-per-sec: AppState.zoom * 1px;
+    property <length> content-w: max(self.width - root.head-w, (AppState.total-seconds + 10) * root.px-per-sec);
+    property <int> tick-step: AppState.zoom >= 120 ? 1 : AppState.zoom >= 40 ? 5 : AppState.zoom >= 16 ? 10 : 30;
+    background: Theme.window;
+    border-width: 1px;
+    border-color: Theme.line;
+
+    // 軌道標題（固定在左邊，不隨水平捲動）
+    heads := Rectangle {
+        x: 0;
+        y: 0;
+        width: root.head-w;
+        height: parent.height;
+        background: Theme.panel;
+        Rectangle {
+            height: root.ruler-h;
+            y: 0;
+            background: Theme.header;
+            Text {
+                x: 10px;
+                text: "軌道";
+                color: Theme.text-faint;
+                font-size: Theme.font-small;
+                vertical-alignment: center;
+            }
+        }
+        for track[i] in AppState.tracks: Rectangle {
+            y: root.ruler-h + i * root.row-h - flick.content-y;
+            height: root.row-h;
+            border-width: 1px;
+            border-color: Theme.line;
+            background: Theme.panel;
+            Rectangle {
+                x: 0;
+                width: 3px;
+                background: track.color;
+            }
+            Text {
+                x: 12px;
+                y: 8px;
+                text: "A" + (i + 1);
+                color: Theme.text-faint;
+                font-size: Theme.font-small;
+                font-family: Theme.mono-family;
+            }
+            Text {
+                x: 12px;
+                y: 24px;
+                width: parent.width - 20px;
+                text: track.name;
+                color: Theme.text;
+                font-size: Theme.font-body;
+                overflow: elide;
+            }
+        }
+    }
+
+    flick := Flickable {
+        x: root.head-w;
+        width: parent.width - root.head-w;
+        height: parent.height;
+        content-width: root.content-w;
+        content-height: max(self.height, root.ruler-h + AppState.tracks.length * root.row-h + 20px);
+
+        // 尺規
+        ruler := Rectangle {
+            y: 0;
+            height: root.ruler-h;
+            width: root.content-w;
+            background: Theme.header;
+            for t in ceil((AppState.total-seconds + 10) / root.tick-step): Rectangle {
+                x: t * root.tick-step * root.px-per-sec;
+                width: 1px;
+                height: root.ruler-h;
+                background: Theme.line-strong;
+                Text {
+                    x: 4px;
+                    text: floor(t * root.tick-step / 60) + ":" + (mod(t * root.tick-step, 60) < 10 ? "0" : "") + mod(t * root.tick-step, 60);
+                    color: Theme.text-dim;
+                    font-size: 10px;
+                    font-family: Theme.mono-family;
+                    vertical-alignment: center;
+                    height: root.ruler-h;
+                }
+            }
+            TouchArea {
+                mouse-cursor: pointer;
+                clicked => { AppState.seek(max(0, self.mouse-x / root.px-per-sec)); }
+                moved => {
+                    if (self.pressed) {
+                        AppState.seek(max(0, self.mouse-x / root.px-per-sec));
+                    }
+                }
+            }
+        }
+
+        // 軌道底色與片段
+        for track[i] in AppState.tracks: Rectangle {
+            y: root.ruler-h + i * root.row-h;
+            height: root.row-h;
+            width: root.content-w;
+            background: mod(i, 2) == 0 ? #18181b : #1a1a1d;
+            Rectangle {
+                y: parent.height - 1px;
+                height: 1px;
+                background: Theme.line;
+            }
+        }
+        // 點空白處取消選取並移動播放頭
+        TouchArea {
+            y: root.ruler-h;
+            height: parent.height - root.ruler-h;
+            width: root.content-w;
+            clicked => {
+                AppState.select-clip("");
+                AppState.seek(max(0, self.mouse-x / root.px-per-sec));
+            }
+        }
+        for c in AppState.clips: Clip {
+            item: c;
+            y: root.ruler-h + c.track * root.row-h + 4px;
+            height: root.row-h - 8px;
+            px-per-sec: root.px-per-sec;
+            selected: c.id == AppState.selected-clip;
+            clicked => { AppState.select-clip(c.id); }
+        }
+        // 播放頭
+        Rectangle {
+            x: AppState.playhead * root.px-per-sec - 5px;
+            y: 0;
+            width: 11px;
+            height: parent.height;
+            Path {
+                x: 0;
+                y: 0;
+                width: 11px;
+                height: 10px;
+                commands: "M 0 0 L 11 0 L 11 5 L 5.5 10 L 0 5 Z";
+                fill: Theme.playhead;
+                stroke-width: 0;
+            }
+            Rectangle {
+                x: 5px;
+                width: 1px;
+                background: Theme.playhead;
+            }
+        }
+    }
+
+    if AppState.clips.length == 0: Text {
+        x: root.head-w;
+        width: parent.width - root.head-w;
+        text: "這個專案還沒有片段。到「腳本」頁合成台詞，片段會依序排在這裡。";
+        color: Theme.text-faint;
+        font-size: Theme.font-body;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+component Inspector inherits Panel {
+    PanelHeader { title: "檢查器"; }
+    if AppState.selected-clip == "": Rectangle {
+        vertical-stretch: 1;
+        Text {
+            text: "選取時間軸上的片段，\n查看內容與調整順序。";
+            color: Theme.text-faint;
+            font-size: Theme.font-body;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+    for c in AppState.clips: VerticalLayout {
+        visible: c.id == AppState.selected-clip;
+        height: c.id == AppState.selected-clip ? self.preferred-height : 0;
+        padding: Theme.pad;
+        spacing: 8px;
+        FieldLabel { text: "台詞"; }
+        Text {
+            text: c.text;
+            color: Theme.text;
+            font-size: Theme.font-strong;
+            wrap: word-wrap;
+        }
+        Divider { }
+        VerticalLayout {
+            spacing: 5px;
+            InfoRow { label: "聲音"; value: c.voice; label-width: 40px; }
+            InfoRow { label: "引擎"; value: c.engine; label-width: 40px; }
+            InfoRow { label: "長度"; value: round(c.duration * 100) / 100 + " 秒"; label-width: 40px; }
+            InfoRow { label: "響度"; value: c.lufs; label-width: 40px; }
+            InfoRow { label: "檔案"; value: c.path; label-width: 40px; dim: true; }
+        }
+        Divider { }
+        HorizontalLayout {
+            spacing: 6px;
+            Button { text: "往前"; clicked => { AppState.move-clip(-1); } }
+            Button { text: "往後"; clicked => { AppState.move-clip(1); } }
+            Button {
+                text: c.starred ? "取消星號" : "加星號";
+                clicked => { AppState.star-clip(!c.starred); }
+            }
+        }
+        HorizontalLayout {
+            spacing: 6px;
+            Button {
+                text: "重新合成";
+                enabled: !AppState.busy;
+                clicked => { AppState.regenerate-clip(); }
+            }
+            Button { text: "開啟資料夾"; clicked => { AppState.open-clip-folder(); } }
+        }
+        Button {
+            text: "從時間軸移除";
+            kind: ButtonKind.danger;
+            clicked => { AppState.remove-clip(); }
+        }
+        Text {
+            text: "移除只會從時間軸拿掉，音檔仍保留在資料夾裡。";
+            color: Theme.text-faint;
+            font-size: Theme.font-small;
+            wrap: word-wrap;
+        }
+    }
+    Rectangle { vertical-stretch: 1; }
+}
+
+export component TimelinePage inherits Rectangle {
+    background: Theme.window;
+    HorizontalLayout {
+        padding: 6px;
+        spacing: 6px;
+        VerticalLayout {
+            spacing: 6px;
+            horizontal-stretch: 1;
+            Transport { }
+            Tracks { vertical-stretch: 1; }
+        }
+        Inspector { width: 280px; }
+    }
+}

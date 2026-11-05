@@ -1,0 +1,16 @@
+id = "breezyvoice"
+name = "BreezyVoice"
+vendor = "聯發創新基地 MediaTek Research"
+summary = "為台灣華語調校，可用注音指定破音字，例如「[:ㄓㄨㄥ4]」"
+license = "Apache-2.0，可商用"
+license_url = "https://github.com/mtkresearch/BreezyVoice/blob/main/LICENSE"
+homepage = "https://github.com/mtkresearch/BreezyVoice"
+min_vram_gb = 4.0
+sample_rate = 22050
+languages = ["zh-TW"]
+chunk_chars = 120
+order = 5
+
+[capabilities]
+clone = true
+zhuyin = true

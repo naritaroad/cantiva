@@ -1,0 +1,70 @@
+id = "qwen3-tts"
+name = "Qwen3-TTS"
+vendor = "阿里巴巴 Qwen"
+summary = "九個內建說話人可用自然語言指定語氣（1.7B）；3 秒參考音即可複製聲音（0.6B Base）"
+license = "Apache-2.0，可商用"
+license_url = "https://github.com/QwenLM/Qwen3-TTS/blob/main/LICENSE"
+homepage = "https://github.com/QwenLM/Qwen3-TTS"
+min_vram_gb = 7.0
+sample_rate = 24000
+languages = ["zh", "en", "ja", "ko", "de", "fr", "ru", "pt", "es", "it"]
+chunk_chars = 180
+order = 1
+
+[capabilities]
+clone = true
+instruct = true
+
+[[builtin_voices]]
+id = "Vivian"
+label = "薇薇安"
+language = "zh"
+gender = "女聲"
+
+[[builtin_voices]]
+id = "Serena"
+label = "瑟琳娜"
+language = "zh"
+gender = "女聲"
+
+[[builtin_voices]]
+id = "Uncle_Fu"
+label = "傅叔"
+language = "zh"
+gender = "男聲"
+
+[[builtin_voices]]
+id = "Dylan"
+label = "迪倫（北京腔）"
+language = "zh"
+gender = "男聲"
+
+[[builtin_voices]]
+id = "Eric"
+label = "艾瑞克（四川腔）"
+language = "zh"
+gender = "男聲"
+
+[[builtin_voices]]
+id = "Ryan"
+label = "萊恩"
+language = "en"
+gender = "男聲"
+
+[[builtin_voices]]
+id = "Aiden"
+label = "艾登"
+language = "en"
+gender = "男聲"
+
+[[builtin_voices]]
+id = "Ono_Anna"
+label = "小野安娜"
+language = "ja"
+gender = "女聲"
+
+[[builtin_voices]]
+id = "Sohee"
+label = "素熙"
+language = "ko"
+gender = "女聲"

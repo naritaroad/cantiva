@@ -1,0 +1,41 @@
+// Cantiva 的設計 token。色彩與尺寸只在這裡定義，其他檔案一律引用 Theme。
+
+export global Theme {
+    // 背景層次：由深到淺，越靠近使用者的面板越亮（Resolve 式的炭灰層次，不用純黑）。
+    out property <color> window: #141416;
+    out property <color> panel: #1c1c1f;
+    out property <color> raised: #242428;
+    out property <color> header: #2b2b30;
+    out property <color> hover: #33333a;
+    out property <color> line: #34343a;
+    out property <color> line-strong: #46464e;
+
+    out property <color> text: #d4d4d8;
+    out property <color> text-dim: #8e8e97;
+    out property <color> text-faint: #61616a;
+
+    // 唯一的強調色：選取、目前頁面、焦點。
+    out property <color> accent: #e3a23b;
+    out property <color> accent-dim: #e3a23b33;
+    out property <color> on-accent: #1a1406;
+
+    out property <color> playhead: #e5484d;
+    out property <color> danger: #e5484d;
+    out property <color> ok: #4cbf6a;
+    out property <color> warn: #d9c440;
+
+    // 片段顏色：一個聲音一種，低彩度，讓波形保持可讀。
+    out property <[color]> clip-colors: [#3f8f8b, #4c6fa6, #7b5ca8, #8c8f3f, #a65a70, #a8864d];
+
+    out property <length> font-small: 11px;
+    out property <length> font-body: 12px;
+    out property <length> font-strong: 13px;
+    out property <length> font-title: 15px;
+    out property <string> font-family: "Microsoft JhengHei UI";
+    out property <string> mono-family: "Consolas";
+
+    out property <length> radius: 3px;
+    out property <length> gap: 8px;
+    out property <length> pad: 12px;
+    out property <length> header-height: 28px;
+}
