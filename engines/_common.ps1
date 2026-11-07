@@ -40,7 +40,7 @@ function Invoke-Checked {
 }
 
 function Initialize-Engine([string]$Id) {
-    Assert-Command 'uv' '請先執行 scripts\setup.ps1，或 winget install --id astral-sh.uv'
+    Assert-Command 'uv' '請執行 Cantiva 資料夾裡的 scripts\install-tools.ps1，或 winget install --id astral-sh.uv；裝完重新開啟 Cantiva'
     $script:EngineId = $Id
     $script:EngineSource = (Resolve-Path (Join-Path $CantivaEnginesRoot $Id)).Path
     $script:WorkerPath = (Resolve-Path (Join-Path $CantivaEnginesRoot '_worker')).Path
@@ -67,7 +67,7 @@ function Install-Packages {
 }
 
 function Sync-Repo([string]$Url, [string]$Ref, [switch]$Recursive) {
-    Assert-Command 'git' '請先安裝 Git：winget install --id Git.Git'
+    Assert-Command 'git' '請執行 Cantiva 資料夾裡的 scripts\install-tools.ps1，或 winget install --id Git.Git；裝完重新開啟 Cantiva'
     $repo = Join-Path $script:EngineHome 'repo'
     if (-not (Test-Path (Join-Path $repo '.git'))) {
         Write-Step "下載原始碼 $Url"

@@ -35,4 +35,8 @@ Some GPT-SoVITS pretrained components (chinese-roberta-wwm-ext-large, chinese-hu
 | rfd 0.17, ebur128 0.1 | MIT |
 | hound 3.5 | Apache-2.0 |
 
+## Installer
+
+The Windows installer is built with [Inno Setup](https://jrsoftware.org/isinfo.php) (Inno Setup License). `packaging/ChineseTraditional.isl` is the Traditional Chinese translation from the [Inno Setup repository](https://github.com/jrsoftware/issrc/blob/main/Files/Languages/ChineseTraditional.isl), distributed under the same license.
+
 For the full list, run `cargo tree` in the repository root or generate a report with cargo-about.

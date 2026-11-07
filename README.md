@@ -7,7 +7,7 @@
 [Architecture](docs/architecture.md) · [Changelog](CHANGELOG.md) · [Issues](https://github.com/naritaroad/cantiva/issues) · [Security](SECURITY.md)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/naritaroad/cantiva/ci.yml?branch=main&style=flat-square&label=ci&labelColor=1c1c1f)](https://github.com/naritaroad/cantiva/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.1.0-e3a23b?style=flat-square&labelColor=1c1c1f)
+![version](https://img.shields.io/badge/version-0.2.0-e3a23b?style=flat-square&labelColor=1c1c1f)
 ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-1c1c1f?style=flat-square)
 ![rust](https://img.shields.io/badge/rust-%E2%89%A51.92-1c1c1f?style=flat-square&logo=rust)
 ![MCP](https://img.shields.io/badge/MCP-rmcp%203.8-1c1c1f?style=flat-square)
@@ -117,7 +117,30 @@ Full rules: [skill/cantiva-voice/reference/script-format.md](skill/cantiva-voice
 
 ## Installation
 
-Requires Windows 10/11 and an NVIDIA GPU (8 GB VRAM or more recommended). From the repository root:
+Requires Windows 10/11 (x64) and an NVIDIA GPU (8 GB VRAM or more recommended).
+
+### Download
+
+Get the latest files from [Releases](https://github.com/naritaroad/cantiva/releases/latest):
+
+| File | Use |
+|---|---|
+| `Cantiva-<version>-windows-x64-setup.exe` | Installer. Installs to `%LOCALAPPDATA%\Programs\Cantiva` without administrator rights, adds a Start-menu shortcut, and can install the agent skill and the tools engines need (uv, Git) with winget. |
+| `Cantiva-<version>-windows-x64-portable.zip` | The same files without an installer. Unzip anywhere and run `cantiva.exe`. |
+| `cantiva-voice-skill-<version>.zip` | The agent skill on its own. Unzip into `%USERPROFILE%\.claude\skills` or `%USERPROFILE%\.agents\skills`, or upload the zip in Claude's Skills settings. |
+| `SHA256SUMS.txt` | Checksums. |
+
+The binaries are not code-signed yet, so SmartScreen may warn on first run (More info, then Run anyway). Uninstalling removes the program files only; your data in `%USERPROFILE%\Cantiva` stays.
+
+GPT-SoVITS also needs CMake and a C++ compiler. Run this from the Cantiva folder to install them:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\install-tools.ps1 -GptSovits
+```
+
+### Build from source
+
+From the repository root:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
@@ -125,10 +148,10 @@ powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 
 `setup.ps1` uses winget to install whatever is missing (Git, Rust, Visual Studio Build Tools, uv, CMake, cloudflared), builds a release into `dist\Cantiva` and creates a Start-menu shortcut. Re-running it updates an existing install.
 
-Then:
+### After installing
 
 1. Open Cantiva and install engines from the 引擎 (Engines) page. Each engine downloads several GB in its own PowerShell window and runs a self-test at the end.
-2. Register the MCP server with your agents. Without switches the script only prints the configuration and changes nothing.
+2. Register the MCP server with your agents. The script is in the `scripts` folder of the install (or of the repository). Without switches it only prints the configuration and changes nothing.
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 -Claude -Codex -Cursor -Grok -Skill
@@ -152,7 +175,8 @@ cantiva/
 ├── engines/             Per-engine adapter.py, engine.toml, install.ps1
 │   └── _worker/         Shared Python worker (stdlib only)
 ├── skill/cantiva-voice/ Companion skill for agents
-├── scripts/             setup, register-mcp, install-engine
+├── scripts/             setup, package, register-mcp, install-engine, install-tools
+├── packaging/           Inno Setup installer script
 ├── tests/               End-to-end tests and the screenshot script
 └── docs/                Architecture notes, zh-TW translations, assets
 ```

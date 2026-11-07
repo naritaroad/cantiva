@@ -231,6 +231,7 @@ export component AppWindow inherits Window {
 // Slint 免版稅授權要求在「關於」畫面顯示 AboutSlint。
 export component AboutWindow inherits Window {
     in property <string> data-dir;
+    in property <string> version;
     title: "關於 Cantiva";
     width: 460px;
     height: 420px;
@@ -239,7 +240,7 @@ export component AboutWindow inherits Window {
     VerticalLayout {
         padding: 20px;
         spacing: 10px;
-        Text { text: "Cantiva 0.1.0"; color: Theme.text; font-size: Theme.font-title; font-weight: 700; }
+        Text { text: "Cantiva " + root.version; color: Theme.text; font-size: Theme.font-title; font-weight: 700; }
         Text {
             text: "本機語音工作室。模型、聲音與音檔都留在這台電腦。";
             color: Theme.text-dim;

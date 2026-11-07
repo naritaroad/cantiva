@@ -35,4 +35,8 @@ GPT-SoVITS 的部分預訓練元件（chinese-roberta-wwm-ext-large、chinese-hu
 | rfd 0.17、ebur128 0.1 | MIT |
 | hound 3.5 | Apache-2.0 |
 
+## 安裝程式
+
+Windows 安裝程式用 [Inno Setup](https://jrsoftware.org/isinfo.php) 建置（Inno Setup License）。`packaging/ChineseTraditional.isl` 是 [Inno Setup repo](https://github.com/jrsoftware/issrc/blob/main/Files/Languages/ChineseTraditional.isl) 裡的繁體中文翻譯，依相同授權散布。
+
 完整清單請在專案根目錄執行 `cargo tree`，或用 cargo-about 產生。

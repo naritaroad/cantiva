@@ -7,7 +7,7 @@
 [架構](docs/zh-TW/architecture.md) · [變更紀錄](CHANGELOG.md) · [問題回報](https://github.com/naritaroad/cantiva/issues) · [安全性](SECURITY.md)
 
 [![CI](https://img.shields.io/github/actions/workflow/status/naritaroad/cantiva/ci.yml?branch=main&style=flat-square&label=ci&labelColor=1c1c1f)](https://github.com/naritaroad/cantiva/actions/workflows/ci.yml)
-![version](https://img.shields.io/badge/version-0.1.0-e3a23b?style=flat-square&labelColor=1c1c1f)
+![version](https://img.shields.io/badge/version-0.2.0-e3a23b?style=flat-square&labelColor=1c1c1f)
 ![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-1c1c1f?style=flat-square)
 ![rust](https://img.shields.io/badge/rust-%E2%89%A51.92-1c1c1f?style=flat-square&logo=rust)
 ![MCP](https://img.shields.io/badge/MCP-rmcp%203.8-1c1c1f?style=flat-square)
@@ -117,7 +117,30 @@ Rust 負責介面、音訊處理、工作排程與 MCP；Python 只負責呼叫�
 
 ## 安裝
 
-需要 Windows 10/11 與 NVIDIA 顯示卡（建議 8 GB 以上顯示記憶體）。在專案根目錄開 PowerShell：
+需要 Windows 10/11（x64）與 NVIDIA 顯示卡（建議 8 GB 以上顯示記憶體）。
+
+### 下載
+
+到 [Releases](https://github.com/naritaroad/cantiva/releases/latest) 下載最新版：
+
+| 檔案 | 用途 |
+|---|---|
+| `Cantiva-<版本>-windows-x64-setup.exe` | 安裝程式。裝到 `%LOCALAPPDATA%\Programs\Cantiva`，不需要系統管理員權限；會建立開始功能表捷徑，也可以順便安裝 agent skill，並用 winget 裝好引擎需要的 uv 與 Git。 |
+| `Cantiva-<版本>-windows-x64-portable.zip` | 免安裝版，內容相同。解壓縮到任何地方，執行 `cantiva.exe`。 |
+| `cantiva-voice-skill-<版本>.zip` | 只有 agent skill。解壓縮到 `%USERPROFILE%\.claude\skills` 或 `%USERPROFILE%\.agents\skills`，或在 Claude 的 Skills 設定上傳這個 zip。 |
+| `SHA256SUMS.txt` | 檢查碼。 |
+
+執行檔目前還沒有程式碼簽章，第一次執行時 SmartScreen 可能會警告（按「其他資訊」→「仍要執行」）。解除安裝只會移除程式檔，`%USERPROFILE%\Cantiva` 裡的資料都會保留。
+
+GPT-SoVITS 另外需要 CMake 與 C++ 編譯器，在 Cantiva 資料夾執行：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\install-tools.ps1 -GptSovits
+```
+
+### 從原始碼建置
+
+在專案根目錄開 PowerShell：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
@@ -125,10 +148,10 @@ powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 
 `setup.ps1` 會用 winget 補齊缺少的工具（Git、Rust、Visual Studio Build Tools、uv、CMake、cloudflared），編譯到 `dist\Cantiva` 並建立開始功能表捷徑。重跑一次就是更新。
 
-之後：
+### 裝好之後
 
 1. 開啟 Cantiva，到「引擎」頁安裝模型。每個模型會開一個 PowerShell 視窗下載，需要幾 GB 空間，最後會跑自我測試。
-2. 註冊給 AI agent 使用。不加參數就只印出設定、不改任何檔案。
+2. 註冊給 AI agent 使用。腳本在安裝資料夾（或 repo）的 `scripts` 裡；不加參數就只印出設定、不改任何檔案。
 
    ```powershell
    powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 -Claude -Codex -Cursor -Grok -Skill
@@ -152,7 +175,8 @@ cantiva/
 ├── engines/             各模型的 adapter.py、engine.toml 與 install.ps1
 │   └── _worker/         共用的 Python worker（只用標準函式庫）
 ├── skill/cantiva-voice/ 給 agent 的配套 skill
-├── scripts/             setup、register-mcp、install-engine
+├── scripts/             setup、package、register-mcp、install-engine、install-tools
+├── packaging/           Inno Setup 安裝程式設定
 ├── tests/               端到端測試與截圖腳本
 └── docs/                架構說明、繁中翻譯、圖檔
 ```

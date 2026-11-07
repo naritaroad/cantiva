@@ -259,6 +259,7 @@ impl App {
         match AboutWindow::new() {
             Ok(w) => {
                 w.set_data_dir(self.rt.paths.root().display().to_string().into());
+                w.set_version(env!("CARGO_PKG_VERSION").into());
                 let _ = w.show();
                 // 視窗關閉前保留參照，否則會立刻被釋放。
                 self.state.borrow_mut().about = Some(w);

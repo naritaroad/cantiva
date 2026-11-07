@@ -742,7 +742,7 @@ dependencies = [
 
 [[package]]
 name = "cantiva"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "arboard",
@@ -765,7 +765,7 @@ dependencies = [
 
 [[package]]
 name = "cantiva-api"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "axum",
  "cantiva-core",
@@ -782,7 +782,7 @@ dependencies = [
 
 [[package]]
 name = "cantiva-audio"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ebur128",
  "hound",
@@ -791,7 +791,7 @@ dependencies = [
 
 [[package]]
 name = "cantiva-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "directories",
  "rusqlite",
@@ -805,7 +805,7 @@ dependencies = [
 
 [[package]]
 name = "cantiva-engine"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "cantiva-audio",
  "cantiva-core",
@@ -823,7 +823,7 @@ dependencies = [
 
 [[package]]
 name = "cantiva-mcp"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "axum",

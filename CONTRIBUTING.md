@@ -54,6 +54,14 @@ These keep Cantiva safe to run on someone's own machine. Pull requests that brea
 3. Write `install.ps1` on top of `engines/_common.ps1`, ending with `Invoke-SelfTest` and `Complete-Install`.
 4. Add the id to the catalog test and to `skill/cantiva-voice/reference/engines.md`, and the model's license to `THIRD_PARTY_NOTICES.md`.
 
+## Releasing
+
+1. Move the `[Unreleased]` entries in `CHANGELOG.md` under a new version heading, and set the same version in `[workspace.package]` in `Cargo.toml` and in the internal `version = "..."` requirements of the crates.
+2. Commit, wait for CI to pass, then tag and push: `git tag v<version>` and `git push origin v<version>`.
+3. `.github/workflows/release.yml` builds the installer, the portable zip and the skill zip with `scripts\package.ps1` and publishes them as a GitHub Release, with that version's changelog section as the notes. The tag must match the `Cargo.toml` version or the workflow stops.
+
+To build the same files locally, install Inno Setup 6 (`winget install --id JRSoftware.InnoSetup`) and run `powershell -ExecutionPolicy Bypass -File scripts\package.ps1`. They land in `target\release-assets`.
+
 ## Pull requests
 
 - Keep each pull request to one change, and include tests for behavior you add or fix.

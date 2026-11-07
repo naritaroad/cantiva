@@ -4,8 +4,13 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-07
+
 ### Added
 
+- GitHub Releases: pushing a `v*` tag builds and publishes a Windows installer (`Cantiva-<version>-windows-x64-setup.exe`, Inno Setup, per-user, no administrator rights), a portable zip, the `cantiva-voice` skill as its own zip, and `SHA256SUMS.txt`.
+- The installer adds a Start-menu shortcut, can copy the skill to `~/.claude/skills` and `~/.agents/skills`, and can install uv and Git with winget. Its wizard is in Traditional Chinese or English. Uninstalling keeps `%USERPROFILE%\Cantiva`.
+- `scripts/package.ps1` builds the release files locally; `scripts/install-tools.ps1` installs the tools engines need (`-GptSovits` adds CMake and the C++ Build Tools, `-Tunnel` adds cloudflared); `scripts/release-notes.ps1` turns a changelog section into release notes.
 - `CONTRIBUTING.md`, `SECURITY.md`, issue and pull request templates, and a Windows CI workflow that runs the Rust tests, the Python worker tests and the MCP end-to-end test.
 - README banner (`docs/assets/banner.svg`).
 - Cargo manifests now carry `description`, `repository` and `homepage`.
@@ -14,10 +19,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - `README.md` is now in English, with the Traditional Chinese version in `README.zh-TW.md`. `docs/architecture.md` and `THIRD_PARTY_NOTICES.md` are in English, with zh-TW translations under `docs/zh-TW/`. `docs/README.en.md` is removed.
 - `CHANGELOG.md` is now written in English.
+- Release builds link the C runtime statically, so the Visual C++ Redistributable is not needed.
+- `register-mcp.ps1` also works from an installed copy (`<install folder>\scripts`), not only from the repository.
+- When uv, Git or CMake is missing, engine installs now point to `scripts\install-tools.ps1` instead of `setup.ps1`.
 - On Windows the default data folder moved from `%APPDATA%\Naritaroad\Cantiva\data` to `%USERPROFILE%\Cantiva`. Processes started from MSIX-packaged apps such as Claude Desktop have their AppData writes redirected to that app's private folder, so takes made by an agent and installed engines were invisible to Cantiva. Move the 0.1.0 folder to the new location, or set `CANTIVA_HOME` to the old one.
 
 ### Fixed
 
+- The About window shows the running version instead of a fixed "0.1.0".
 - Re-running `setup.ps1` no longer fails when `cantiva-mcp.exe` or `cantiva.exe` is held open by an agent (for example Cursor): the old file is renamed out of the way and the new build is put in place.
 - When `setup.ps1` runs inside another app (for example Claude Desktop), it detects that the Start-menu shortcut was redirected to a private folder and asks you to re-run it from a normal PowerShell window.
 - When headless mode receives a shutdown request, the log now says so instead of always reporting that the main window took over.
@@ -48,5 +57,6 @@ All notable changes to this project are documented here. The format follows [Kee
 - A single-instance lock prevents a second Cantiva from loading another model at the same time.
 - Engine workers watch the Cantiva process and exit if it crashes, so they don't keep holding VRAM.
 
-[Unreleased]: https://github.com/naritaroad/cantiva/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/naritaroad/cantiva/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/naritaroad/cantiva/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/naritaroad/cantiva/releases/tag/v0.1.0

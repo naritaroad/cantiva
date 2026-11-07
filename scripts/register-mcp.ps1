@@ -16,9 +16,10 @@ param([switch]$Claude, [switch]$Codex, [switch]$Cursor, [switch]$Grok, [switch]$
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-$Dist = Join-Path $Root 'dist\Cantiva'
+# 安裝版：本腳本在 <安裝資料夾>\scripts；從原始碼建置：在 repo 的 scripts，程式在 dist\Cantiva。
+$Dist = if (Test-Path (Join-Path $Root 'cantiva-mcp.exe')) { $Root } else { Join-Path $Root 'dist\Cantiva' }
 $Mcp = Join-Path $Dist 'cantiva-mcp.exe'
-if (-not (Test-Path $Mcp)) { throw "找不到 $Mcp，請先執行 scripts\setup.ps1" }
+if (-not (Test-Path $Mcp)) { throw "找不到 $Mcp，請先執行 scripts\setup.ps1，或從 GitHub Releases 下載安裝 Cantiva" }
 
 if (-not ($Claude -or $Codex -or $Cursor -or $Grok -or $Skill)) {
     & $Mcp --print-config

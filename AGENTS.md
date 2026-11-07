@@ -48,6 +48,10 @@ python tests/screenshots.py out  # Linux with Xvfb; renders every page
 
 The `dev-sine` engine (shown only with `CANTIVA_DEV=1`) fakes speech so the whole pipeline is testable without a GPU.
 
+## Releases
+
+Pushing a `v<version>` tag runs `.github/workflows/release.yml`, which calls `scripts/package.ps1` and publishes the installer (`packaging/cantiva.iss`, Inno Setup), the portable zip and the skill zip. The tag must equal the workspace version in `Cargo.toml`. Anything the installed app needs at runtime must be copied into the stage folder in `package.ps1`. Steps are in `CONTRIBUTING.md`.
+
 ## Changelog
 
 Every user-visible change gets an entry under `[Unreleased]` in `CHANGELOG.md` in the same commit.
