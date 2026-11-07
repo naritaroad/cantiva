@@ -1,45 +1,52 @@
-# 變更紀錄
+# Changelog
 
-格式依 [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/)，版本號依 [SemVer 2.0.0](https://semver.org/spec/v2.0.0.html)。
+All notable changes to this project are documented here. The format follows [Keep a Changelog 2.0.0](https://keepachangelog.com/en/2.0.0/), and the project uses [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `CONTRIBUTING.md`, `SECURITY.md`, issue and pull request templates, and a Windows CI workflow that runs the Rust tests, the Python worker tests and the MCP end-to-end test.
+- README banner (`docs/assets/banner.svg`).
+- Cargo manifests now carry `description`, `repository` and `homepage`.
+
 ### Changed
 
-- Windows 的預設資料夾從 `%APPDATA%\Naritaroad\Cantiva\data` 改成 `%USERPROFILE%\Cantiva`。從 Claude 桌面版這類 MSIX 套件程式啟動的程序寫入 AppData 時，會被轉到該程式的私有資料夾，造成 agent 合成的音檔與裝好的引擎在 Cantiva 裡看不到。0.1.0 的資料請整個資料夾搬到新位置；或設定 `CANTIVA_HOME` 指向舊位置。
+- `README.md` is now in English, with the Traditional Chinese version in `README.zh-TW.md`. `docs/architecture.md` and `THIRD_PARTY_NOTICES.md` are in English, with zh-TW translations under `docs/zh-TW/`. `docs/README.en.md` is removed.
+- `CHANGELOG.md` is now written in English.
+- On Windows the default data folder moved from `%APPDATA%\Naritaroad\Cantiva\data` to `%USERPROFILE%\Cantiva`. Processes started from MSIX-packaged apps such as Claude Desktop have their AppData writes redirected to that app's private folder, so takes made by an agent and installed engines were invisible to Cantiva. Move the 0.1.0 folder to the new location, or set `CANTIVA_HOME` to the old one.
 
 ### Fixed
 
-- `setup.ps1` 重跑時，如果 `cantiva-mcp.exe` 或 `cantiva.exe` 正被 agent（例如 Cursor）開著，不再因為無法覆蓋而失敗：舊檔改名移開後放上新版。
-- `setup.ps1` 從其他應用程式（例如 Claude 桌面版）裡執行時，會偵測開始功能表捷徑是否被轉到私有資料夾，並提示改在一般 PowerShell 重跑。
-- 無視窗模式收到結束要求時，記錄改寫成「收到結束要求」，不再一律寫成主視窗接手。
-
-- Windows：`engines/_worker` 的自我測試單元測試改用 UTF-8 讀取子程序輸出，不再因系統字碼頁（cp950）解碼失敗。
-- Windows：`studio_dev_engine` 整合測試不再跳過，改用 `python -m venv` 建立假引擎的 venv，完整流程在 Windows 上也會測到 worker 啟動與合成。
-- Windows：`tests/e2e_mcp.py` 可以在 Windows 執行，結束時改用控制 API 的 `/v1/shutdown` 關閉無視窗模式，不再依賴 `pkill`。
+- Re-running `setup.ps1` no longer fails when `cantiva-mcp.exe` or `cantiva.exe` is held open by an agent (for example Cursor): the old file is renamed out of the way and the new build is put in place.
+- When `setup.ps1` runs inside another app (for example Claude Desktop), it detects that the Start-menu shortcut was redirected to a private folder and asks you to re-run it from a normal PowerShell window.
+- When headless mode receives a shutdown request, the log now says so instead of always reporting that the main window took over.
+- Windows: the `engines/_worker` self-test unit test reads child-process output as UTF-8 and no longer fails to decode under the system code page (cp950).
+- Windows: the `studio_dev_engine` integration test is no longer skipped. It builds the fake engine's venv with `python -m venv`, so worker start-up and synthesis are covered on Windows too.
+- Windows: `tests/e2e_mcp.py` runs on Windows. It shuts down headless mode through the control API's `/v1/shutdown` instead of relying on `pkill`.
 
 ## [0.1.0] - 2026-11-05
 
 ### Added
 
-- 桌面程式（Slint 1.18）：聲音庫、腳本、時間軸、輸出、引擎、連線六頁，DaVinci Resolve 式的頁面列與深色介面。
-- 五個 TTS 引擎：Qwen3-TTS、GPT-SoVITS v2ProPlus、Fun-CosyVoice 3、IndexTTS 2.5、BreezyVoice。每個引擎有獨立的 uv venv 與 Windows 安裝腳本，安裝後會自我測試。
-- GPT-SoVITS 角色模型：可以匯入訓練好的 GPT（`.ckpt`）與 SoVITS（`.pth`）權重，存成聲音庫的一個聲音；合成時自動切換權重。
-- 腳本格式：`@聲音：{語氣}台詞`、`#` 註解、空行分段。
-- 時間軸：多軌、波形、播放頭與音量表；可以調整片段順序、重新合成、標星號、移除。
-- 輸出：依時間軸順序合併成一個 WAV，自動統一取樣率並做響度正規化。
-- 同意紀錄：建立複製聲音時必須選擇同意依據並寫下說明。
-- `cantiva-mcp`：10 個 MCP 工具，支援 stdio 與 Streamable HTTP；Cantiva 沒開時自動以無視窗模式啟動。
-- 對外通道（預設關閉）：Cloudflare 臨時通道，網址含密鑰，工具權限縮小。
-- 配套 skill `cantiva-voice`，以及 `register-mcp.ps1`：可以註冊到 Claude Code、Codex、Cursor、Grok Build CLI，並安裝 skill。
-- `setup.ps1`：用 winget 補齊工具、編譯、組成 dist 資料夾並建立捷徑。
+- Desktop app (Slint 1.18) with six pages (Voices, Script, Timeline, Export, Engines, Connect), a DaVinci Resolve-style page bar and a dark UI.
+- Five TTS engines: Qwen3-TTS, GPT-SoVITS v2ProPlus, Fun-CosyVoice 3, IndexTTS 2.5 and BreezyVoice. Each has its own uv venv and a Windows install script that runs a self-test after installing.
+- GPT-SoVITS character models: import trained GPT (`.ckpt`) and SoVITS (`.pth`) weights as a voice in the library. The weights are swapped in automatically at synthesis time.
+- Script format: `@Voice：{tone}line`, `#` comments, blank lines between clips.
+- Timeline: multiple tracks, waveforms, playhead and level meter. Clips can be reordered, regenerated, starred and removed.
+- Export: joins the timeline into one WAV in order, unifies sample rates and normalizes loudness.
+- Consent records: creating a cloned voice requires choosing a consent basis and writing a statement.
+- `cantiva-mcp`: 10 MCP tools over stdio and Streamable HTTP. Starts Cantiva headless when it isn't running.
+- Tunnel (off by default): a Cloudflare quick tunnel whose URL contains a secret, with a reduced tool set.
+- Companion skill `cantiva-voice`, and `register-mcp.ps1`, which registers the server with Claude Code, Codex, Cursor and Grok Build CLI and installs the skill.
+- `setup.ps1`: installs tools with winget, builds, assembles the dist folder and creates a shortcut.
 
 ### Security
 
-- 對外通道每次開啟都用新的一次性密鑰；確認 MCP 真的在監聽後才啟動 cloudflared。
-- 通道模式的限制改由控制 API 把關：不能建立聲音、播放、載入或卸載模型；回傳內容不含本機路徑與逐字稿。
-- 單一實例鎖，避免第二個 Cantiva 同時載入另一個模型。
-- 引擎 worker 監看 Cantiva 程序，Cantiva 當掉時 worker 自己結束，不會殘留佔用顯示記憶體。
+- The tunnel gets a new one-time secret every time it opens, and cloudflared starts only after the MCP server is confirmed to be listening.
+- Tunnel restrictions are enforced by the control API: no creating voices, playing audio, or loading or unloading models; responses contain no local paths or transcripts.
+- A single-instance lock prevents a second Cantiva from loading another model at the same time.
+- Engine workers watch the Cantiva process and exit if it crashes, so they don't keep holding VRAM.
 
 [Unreleased]: https://github.com/naritaroad/cantiva/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/naritaroad/cantiva/releases/tag/v0.1.0

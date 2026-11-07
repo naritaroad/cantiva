@@ -4,6 +4,9 @@ edition.workspace = true
 version.workspace = true
 license.workspace = true
 authors.workspace = true
+description = "Cantiva audio utilities: WAV I/O, concat, trim, resample, loudness, peaks"
+repository.workspace = true
+homepage.workspace = true
 rust-version.workspace = true
 
 [dependencies]

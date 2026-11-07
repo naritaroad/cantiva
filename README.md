@@ -1,151 +1,172 @@
 <div align="center">
-  <img src="docs/assets/icon.png" alt="Cantiva" width="96">
-  <h1>Cantiva</h1>
-  <strong>本機語音工作室：開源 TTS 模型、剪輯式時間軸，以及給 AI agent 用的 MCP server</strong><br>
-  模型、聲音與音檔都留在這台電腦。
-</div>
 
-<div align="center">
+<img src="docs/assets/banner.svg" alt="Cantiva: local voice studio for open-source TTS, with a multi-track timeline and an MCP server for AI agents" width="100%">
 
+<br>
+
+[Architecture](docs/architecture.md) · [Changelog](CHANGELOG.md) · [Issues](https://github.com/naritaroad/cantiva/issues) · [Security](SECURITY.md)
+
+[![CI](https://img.shields.io/github/actions/workflow/status/naritaroad/cantiva/ci.yml?branch=main&style=flat-square&label=ci&labelColor=1c1c1f)](https://github.com/naritaroad/cantiva/actions/workflows/ci.yml)
 ![version](https://img.shields.io/badge/version-0.1.0-e3a23b?style=flat-square&labelColor=1c1c1f)
+![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-1c1c1f?style=flat-square)
 ![rust](https://img.shields.io/badge/rust-%E2%89%A51.92-1c1c1f?style=flat-square&logo=rust)
-![ui](https://img.shields.io/badge/ui-Slint%201.18-1c1c1f?style=flat-square)
-![mcp](https://img.shields.io/badge/MCP-rmcp%203.8-1c1c1f?style=flat-square)
-![license](https://img.shields.io/badge/license-MIT-6b6b6b?style=flat-square&labelColor=1c1c1f)
+![MCP](https://img.shields.io/badge/MCP-rmcp%203.8-1c1c1f?style=flat-square)
+[![license](https://img.shields.io/badge/license-MIT-6b6b6b?style=flat-square&labelColor=1c1c1f)](LICENSE)
 
-**繁體中文** | [English](docs/README.en.md)
+**English** | [繁體中文](README.zh-TW.md)
 
 </div>
 
 ---
 
-Cantiva 是 Windows 桌面程式，介面參考 DaVinci Resolve 的剪輯軟體配置。它在你的顯示卡上跑五個開源 TTS 模型，把台詞合成在多軌時間軸上，再匯出成一個 WAV。同一套功能也透過 MCP 提供給 Claude、Codex、Cursor 與 Grok 使用。
+Cantiva is a Windows desktop app for making speech with open-source TTS models on your own GPU. You write a script, Cantiva synthesizes each line with the voice you picked, lays the clips out on a multi-track timeline, and exports one WAV. The same functions are available to Claude, Codex, Cursor and Grok through an MCP server, so an agent can produce narration or a radio drama on your machine.
 
-## 功能
+Models, voices and audio stay on your computer. The layout follows DaVinci Resolve's page bar and dark panels. The interface text is in Traditional Chinese (Taiwan).
 
-- **五個模型，一次只佔一個的顯示記憶體**：Qwen3-TTS、GPT-SoVITS（v2ProPlus）、Fun-CosyVoice 3、IndexTTS 2.5、BreezyVoice。每個模型有獨立的 Python 虛擬環境，套件版本互不衝突；換模型時自動卸載前一個。
-- **腳本式多角色合成**：用 `@聲音：{語氣}台詞` 的格式寫腳本，一行一個片段，依序排上時間軸。
-- **時間軸與檢查器**：每個聲音一條軌道，片段帶波形；可以調整順序、重新合成單一片段、標星號，並用音量表監聽。
-- **聲音庫與同意紀錄**：用 3–15 秒參考音檔複製聲音（GPT-SoVITS 為 3–10 秒），或匯入自己訓練的 GPT-SoVITS 角色模型（`.ckpt` 加 `.pth`）。建立時必須選擇同意依據並寫下說明。
-- **輸出**：依時間軸順序接成一個 WAV，自動統一不同模型的取樣率，並依 EBU R128 做響度正規化（預設 −16 LUFS）。
-- **MCP server**：`cantiva-mcp` 提供 10 個工具，例如 `speak`、`render_script`、`list_voices`、`create_voice`。本機 agent 走 stdio；Cantiva 沒開時會自動以無視窗模式啟動。
-- **對外通道（預設關閉）**：在「連線」頁開啟後，透過 Cloudflare 臨時通道讓 ChatGPT、Grok Bot 等雲端 agent 連線。網址帶有密鑰，工具權限會縮小。
-- **配套 skill**：`skill/cantiva-voice` 告訴 agent 怎麼挑模型、寫腳本、處理同意紀錄。
+## Features
 
-## 畫面
+- **Five engines, one in VRAM at a time.** Qwen3-TTS, GPT-SoVITS (v2ProPlus), Fun-CosyVoice 3, IndexTTS 2.5 and BreezyVoice. Each runs in its own Python virtualenv, so their dependencies never conflict. Switching engines unloads the previous one.
+- **Script-driven, multi-voice synthesis.** Write `@Voice：{tone}line`, one paragraph per clip. Clips land on the timeline in script order.
+- **Timeline and inspector.** One track per voice, waveforms, reordering, regenerating a single clip, stars and a level meter.
+- **Voice library with consent records.** Clone a voice from a 3–15 s reference clip (3–10 s for GPT-SoVITS), or import a trained GPT-SoVITS character model (`.ckpt` + `.pth`). Every cloned voice needs a consent basis and a written statement.
+- **Export.** Joins the timeline into one WAV, unifies sample rates across engines and normalizes loudness to EBU R128 (−16 LUFS by default).
+- **MCP server.** `cantiva-mcp` exposes 10 tools, including `speak`, `render_script`, `list_voices` and `create_voice`, over stdio or Streamable HTTP. If Cantiva isn't running, it starts it headless.
+- **Tunnel, off by default.** A Cloudflare quick tunnel lets cloud agents such as ChatGPT reach the MCP server. The URL carries a one-time secret, and tunnel requests get a reduced tool set.
+- **Companion skill.** [`skill/cantiva-voice`](skill/cantiva-voice/SKILL.md) tells agents how to pick an engine, write scripts and handle consent.
 
-<img src="docs/assets/timeline.png" alt="時間軸頁：兩條軌道、帶波形的片段與檢查器" width="100%">
+## Screenshots
+
+<img src="docs/assets/timeline.png" alt="Timeline page: two tracks with waveform clips and the inspector" width="100%">
 
 <details>
-<summary>其他頁面</summary>
+<summary>Other pages</summary>
 
-<img src="docs/assets/script.png" alt="腳本頁" width="100%">
-<img src="docs/assets/voices.png" alt="聲音庫頁" width="100%">
-<img src="docs/assets/engines.png" alt="引擎頁" width="100%">
-<img src="docs/assets/connect.png" alt="連線頁" width="100%">
+<img src="docs/assets/script.png" alt="Script page" width="100%">
+<img src="docs/assets/voices.png" alt="Voice library page" width="100%">
+<img src="docs/assets/engines.png" alt="Engines page" width="100%">
+<img src="docs/assets/connect.png" alt="Connect page" width="100%">
 
 </details>
 
-截圖是用內建的開發測試引擎產生的（波形是模擬音節，不是真的語音）。
+The screenshots come from the built-in development engine, which generates synthetic syllables instead of speech.
 
-## 架構
+## Architecture
 
 ```mermaid
 flowchart LR
-  subgraph PC[你的電腦]
-    GUI[cantiva.exe<br>Slint 介面] --- Studio
+  subgraph PC[Your computer]
+    GUI[cantiva.exe<br>Slint UI] --- Studio
     Headless[cantiva --headless] --- Studio
-    Studio[Studio<br>工作佇列、聲音庫、SQLite] -->|本機 HTTP| W[Python worker<br>一次一個模型]
-    API[控制 API<br>127.0.0.1 + 權杖] --- Studio
+    Studio[Studio<br>job queue, voice library, SQLite] -->|local HTTP| W[Python worker<br>one model at a time]
+    API[Control API<br>127.0.0.1 + token] --- Studio
     MCP[cantiva-mcp] -->|HTTP| API
-    Agents[Claude Code／Desktop<br>Codex、Cursor、Grok CLI] -->|stdio| MCP
+    Agents[Claude Code / Desktop<br>Codex, Cursor, Grok CLI] -->|stdio| MCP
   end
-  Cloud[ChatGPT、Grok Bot] -.->|Cloudflare 通道<br>預設關閉| MCP
+  Cloud[ChatGPT and other cloud agents] -.->|Cloudflare tunnel<br>off by default| MCP
 ```
 
-Rust 負責介面、音訊處理、工作排程與 MCP；Python 只負責呼叫模型。每個模型跑在自己的 worker 程序裡，透過只綁 127.0.0.1 的 HTTP 協定溝通。完整說明與技術選擇的評估見 [docs/architecture.md](docs/architecture.md)。
+Rust handles the UI, audio processing, job scheduling and MCP. Python only calls the models: each engine runs in its own worker process and talks to Cantiva over HTTP bound to 127.0.0.1. [docs/architecture.md](docs/architecture.md) covers the request flow, the worker protocol, the tunnel's security model and why each technology was chosen.
 
 <details>
-<summary>引擎一覽</summary>
+<summary>Engines</summary>
 
-| 引擎 | 擅長 | 顯示記憶體 | 授權 |
+| Engine | Good at | VRAM | License |
 |---|---|---|---|
-| Qwen3-TTS | 9 個內建聲音、用自然語言指定語氣 | 約 7 GB（1.7B） | Apache-2.0 |
-| GPT-SoVITS v2ProPlus | 日文、角色模型、3–10 秒複製 | 約 4 GB | MIT |
-| Fun-CosyVoice 3 | 跨語言複製、中文方言 | 約 5 GB | Apache-2.0 |
-| IndexTTS 2.5 | 情緒控制（文字或八維向量） | 約 6 GB | bilibili 模型協議 |
-| BreezyVoice | 台灣華語、注音標破音字 | 約 4 GB | Apache-2.0 |
+| Qwen3-TTS | 9 built-in voices, tone set in natural language | ~7 GB (1.7B) | Apache-2.0 |
+| GPT-SoVITS v2ProPlus | Japanese, character models, 3–10 s cloning | ~4 GB | MIT |
+| Fun-CosyVoice 3 | Cross-lingual cloning, Chinese dialects | ~5 GB | Apache-2.0 |
+| IndexTTS 2.5 | Emotion control (text or an 8-value vector) | ~6 GB | bilibili model license |
+| BreezyVoice | Taiwanese Mandarin, Zhuyin fixes for polyphones | ~4 GB | Apache-2.0 |
 
-顯示記憶體是依官方資料與參數量估計，實際用量以「引擎」頁顯示為準。
+VRAM figures are estimates from official material and parameter counts; the Engines page shows actual usage. Per-engine capabilities are listed in [skill/cantiva-voice/reference/engines.md](skill/cantiva-voice/reference/engines.md).
 
 </details>
 
 <details>
-<summary>資料放在哪裡</summary>
+<summary>Where data lives</summary>
 
-| 內容 | 位置 |
+| Content | Location |
 |---|---|
-| 設定、資料庫、記錄檔 | `%USERPROFILE%\Cantiva` |
-| 各模型的虛擬環境與權重 | `…\Cantiva\engines\<引擎>` |
-| 合成的音檔 | `…\Cantiva\takes\<專案>`（可在設定中修改） |
-| 參考音檔與角色模型 | `…\Cantiva\references` |
+| Settings, database, logs | `%USERPROFILE%\Cantiva` |
+| Engine virtualenvs and weights | `…\Cantiva\engines\<engine>` |
+| Synthesized audio | `…\Cantiva\takes\<project>` (configurable) |
+| Reference clips and character models | `…\Cantiva\references` |
 
-設定環境變數 `CANTIVA_HOME` 可以把整個資料夾搬到別處。不放在 `%APPDATA%` 是因為從 Claude 桌面版這類 MSIX 套件程式啟動的程序寫入 AppData 時，會被轉到該程式的私有資料夾，Cantiva 看不到。
+Set `CANTIVA_HOME` to move the whole folder. Cantiva avoids `%APPDATA%` because processes started from MSIX-packaged apps such as Claude Desktop have their AppData writes redirected to a private folder that Cantiva can't see.
 
 </details>
 
-## 安裝
+<details>
+<summary>Script format</summary>
 
-需要 Windows 10/11 與 NVIDIA 顯示卡（建議 8 GB 以上）。在專案根目錄開 PowerShell：
+```text
+# Scene 1
+@旁白：{低沉、緩慢}夜深了，港口只剩下最後一盞燈。
+
+@qwen3-tts/Serena：你還在等那艘船嗎？
+```
+
+- A blank line ends a clip.
+- `@Name：` (or `@Name:`) picks a library voice or a built-in `engine/speaker`.
+- `{…}` right after the tag is a tone instruction for engines that support it.
+- Lines starting with `#` are comments.
+
+Full rules: [skill/cantiva-voice/reference/script-format.md](skill/cantiva-voice/reference/script-format.md).
+
+</details>
+
+## Installation
+
+Requires Windows 10/11 and an NVIDIA GPU (8 GB VRAM or more recommended). From the repository root:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
 
-腳本會用 winget 補齊 Git、Rust、Visual Studio Build Tools、uv、CMake 與 cloudflared，接著編譯並建立開始功能表捷徑。之後的步驟：
+`setup.ps1` uses winget to install whatever is missing (Git, Rust, Visual Studio Build Tools, uv, CMake, cloudflared), builds a release into `dist\Cantiva` and creates a Start-menu shortcut. Re-running it updates an existing install.
 
-1. 開啟 Cantiva，到「引擎」頁按「安裝」。每個模型會開一個 PowerShell 視窗下載，需要幾 GB 空間。
-2. 註冊給 AI agent 使用（不加參數就只印出設定、不改任何檔案）：
+Then:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 -Claude -Codex -Cursor -Grok -Skill
-```
+1. Open Cantiva and install engines from the 引擎 (Engines) page. Each engine downloads several GB in its own PowerShell window and runs a self-test at the end.
+2. Register the MCP server with your agents. Without switches the script only prints the configuration and changes nothing.
 
-## 專案結構
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts\register-mcp.ps1 -Claude -Codex -Cursor -Grok -Skill
+   ```
+
+   For Claude Desktop, add the entry printed by `cantiva-mcp --print-config` by hand and restart the app.
+
+## Project structure
 
 ```
 cantiva/
-├── app/                 桌面程式（Slint 介面、播放、通道）
-│   ├── ui/              .slint 介面檔
-│   └── src/gui/         介面控制器
-├── mcp/                 cantiva-mcp（rmcp）
+├── app/                 Desktop app (Slint UI, playback, tunnel)
+│   ├── ui/              .slint files
+│   └── src/gui/         UI controller
+├── mcp/                 cantiva-mcp (rmcp)
 ├── crates/
-│   ├── cantiva-core/    資料模型、SQLite、腳本解析、設定
-│   ├── cantiva-audio/   WAV、合併、重新取樣、響度
-│   ├── cantiva-engine/  模型目錄、worker 管理、Studio
-│   └── cantiva-api/     本機控制 API 與客戶端
-├── engines/             各模型的 adapter、描述檔與安裝腳本
-│   └── _worker/         共用的 Python worker（只用標準函式庫）
-├── skill/cantiva-voice/ 給 agent 的配套 skill
-├── scripts/             setup、register-mcp、install-engine
-├── tests/               端到端測試與截圖腳本
-└── docs/
+│   ├── cantiva-core/    Models, SQLite store, script parsing, settings, path safety
+│   ├── cantiva-audio/   WAV I/O, concat, resample, loudness, peaks
+│   ├── cantiva-engine/  Engine catalog, worker supervisor, Studio
+│   └── cantiva-api/     Local control API and client
+├── engines/             Per-engine adapter.py, engine.toml, install.ps1
+│   └── _worker/         Shared Python worker (stdlib only)
+├── skill/cantiva-voice/ Companion skill for agents
+├── scripts/             setup, register-mcp, install-engine
+├── tests/               End-to-end tests and the screenshot script
+└── docs/                Architecture notes, zh-TW translations, assets
 ```
 
-## 聲音與授權
+## Voices and licensing
 
-複製聲音只用在你本人、已取得同意的人，或有授權的素材。各模型與預訓練權重有自己的授權，見 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+Clone only your own voice, voices of people who have given you permission, or licensed material. Cantiva ships no voices of real people or characters. Each model and its pretrained weights carry their own license; IndexTTS 2.5 in particular restricts large commercial users. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-## 開發
+## Contributing
 
-```bash
-cargo test --workspace                      # Rust 單元與整合測試（含假引擎的完整流程）
-python -m unittest discover engines/_worker/tests
-python tests/e2e_mcp.py                     # 模擬 agent 呼叫 MCP 的端到端測試
-```
+Bug reports and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the build, the test commands and the project rules (one GPU model at a time, mandatory consent for cloned voices, local-only services). The `dev-sine` engine lets you run the whole pipeline without a GPU.
 
-修改前請先讀 [AGENTS.md](AGENTS.md)，變更記錄在 [CHANGELOG.md](CHANGELOG.md)。
+Report security issues privately as described in [SECURITY.md](SECURITY.md).
 
-## 授權
+## License
 
-MIT，見 [LICENSE](LICENSE)。介面使用 Slint 的免版稅授權，「關於」視窗依授權條款顯示 Slint 標示。
+MIT, see [LICENSE](LICENSE). The UI uses Slint under its Royalty-free License 2.0, and the About window shows the Slint attribution that license requires.

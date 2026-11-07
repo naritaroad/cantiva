@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="380" viewBox="0 0 1280 380" role="img" aria-labelledby="t d">
+<title id="t">Cantiva</title>
+<desc id="d">Cantiva: a local voice studio for open-source TTS, with a multi-track timeline and an MCP server for AI agents.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18181b"/><stop offset="1" stop-color="#101012"/></linearGradient>
+<radialGradient id="glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#e3a23b" stop-opacity="0.16"/><stop offset="1" stop-color="#e3a23b" stop-opacity="0"/></radialGradient>
+<linearGradient id="fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff"/><stop offset="0.78" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<mask id="fadeMask"><rect x="560" y="0" width="720" height="380" fill="url(#fade)"/></mask>
+<clipPath id="frame"><rect width="1280" height="380" rx="20"/></clipPath>
+</defs>
+<g clip-path="url(#frame)">
+<rect width="1280" height="380" fill="url(#bg)"/>
+<ellipse cx="1010" cy="120" rx="420" ry="260" fill="url(#glow)"/>
+<rect x="72" y="104" width="60" height="60" rx="14" fill="#232327" stroke="#2e2e34"/>
+<rect x="83.0" y="134.0" width="6.0" height="18.0" rx="1.2" fill="#e3a23b"/>
+<rect x="91.4" y="122.0" width="6.0" height="30.0" rx="1.2" fill="#e3a23b"/>
+<rect x="99.8" y="110.0" width="6.0" height="42.0" rx="1.2" fill="#e3a23b"/>
+<rect x="108.2" y="119.0" width="6.0" height="33.0" rx="1.2" fill="#e3a23b"/>
+<rect x="116.6" y="129.2" width="6.0" height="22.8" rx="1.2" fill="#e3a23b"/>
+<rect x="100.4" y="111.2" width="2.4" height="45.6" fill="#e5484d"/>
+<text x="154" y="155" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="58" font-weight="650" letter-spacing="-1.2" fill="#ececef">Cantiva</text>
+<text x="72" y="216" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" fill="#c9c9d0">Local voice studio for open-source TTS.</text>
+<text x="72" y="246" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" fill="#9a9aa3">Timeline editing, consented cloning,</text>
+<text x="72" y="276" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" fill="#9a9aa3">and an MCP server for AI agents.</text>
+<rect x="72" y="300" width="36" height="3" rx="1.5" fill="#e3a23b"/>
+<text x="72" y="328" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="11" letter-spacing="1.0" fill="#77777f">QWEN3-TTS · GPT-SOVITS · COSYVOICE 3 · INDEXTTS 2.5 · BREEZYVOICE</text>
+<g mask="url(#fadeMask)">
+<rect x="600" y="58" width="720" height="264" rx="12" fill="#1c1c1f" stroke="#2e2e34"/>
+<rect x="601" y="59" width="720" height="29" rx="11" fill="#232327"/>
+<rect x="601" y="80" width="720" height="8" fill="#232327"/>
+<path d="M600 88H1320" stroke="#2e2e34"/>
+<text x="616" y="77" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="11" fill="#62626b">00:00:08.94</text>
+<text x="717" y="73" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#9a9aa3">0:00</text>
+<text x="817" y="73" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#9a9aa3">0:05</text>
+<text x="917" y="73" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#9a9aa3">0:10</text>
+<text x="1017" y="73" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#9a9aa3">0:15</text>
+<text x="1117" y="73" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#9a9aa3">0:20</text>
+<text x="1217" y="73" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#9a9aa3">0:25</text>
+<text x="1317" y="73" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#9a9aa3">0:30</text>
+<path d="M712 76V88M732 83V88M752 83V88M772 83V88M792 83V88M812 76V88M832 83V88M852 83V88M872 83V88M892 83V88M912 76V88M932 83V88M952 83V88M972 83V88M992 83V88M1012 76V88M1032 83V88M1052 83V88M1072 83V88M1092 83V88M1112 76V88M1132 83V88M1152 83V88M1172 83V88M1192 83V88M1212 76V88M1232 83V88M1252 83V88M1272 83V88M1292 83V88M1312 76V88" stroke="#3a3a41"/>
+<path d="M712 88V322" stroke="#2e2e34"/>
+<rect x="610" y="102.0" width="3" height="52.0" rx="1.5" fill="#3f8f8b"/>
+<text x="622" y="115.0" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#62626b">A1</text>
+<text x="622" y="132.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="12.5" fill="#c9c9d0">Serena</text>
+<rect x="718" y="96.0" width="110" height="64.0" rx="4" fill="#3f8f8b" fill-opacity="0.32" stroke="#3f8f8b" stroke-opacity="0.9"/>
+<text x="724" y="109.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#c5dddc">The harbor at night</text>
+<path d="M722.0 131.8V138.2M725.0 127.0V143.0M728.0 126.2V143.8M731.0 126.0V144.0M734.0 126.6V143.4M737.0 129.4V140.6M740.0 133.6V136.4M743.0 133.8V136.2M746.0 132.2V137.8M749.0 127.7V142.3M752.0 125.2V144.8M755.0 124.6V145.4M758.0 122.9V147.1M761.0 130.6V139.4M764.0 131.8V138.2M767.0 133.8V136.2M770.0 133.8V136.2M773.0 133.8V136.2M776.0 133.8V136.2M779.0 132.9V137.1M782.0 131.6V138.4M785.0 127.5V142.5M788.0 125.4V144.6M791.0 127.6V142.4M794.0 129.6V140.4M797.0 133.1V136.9M800.0 133.0V137.0M803.0 129.9V140.1M806.0 123.8V146.2M809.0 123.4V146.6M812.0 125.7V144.3M815.0 128.2V141.8M818.0 132.1V137.9M821.0 133.8V136.2" stroke="#95c1bf" stroke-width="1.6" stroke-linecap="round"/>
+<rect x="1042" y="96.0" width="90" height="64.0" rx="4" fill="#3f8f8b" fill-opacity="0.32" stroke="#3f8f8b" stroke-opacity="0.9"/>
+<text x="1048" y="109.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#c5dddc">Not yet.</text>
+<path d="M1046.0 133.8V136.2M1049.0 133.8V136.2M1052.0 130.6V139.4M1055.0 129.3V140.7M1058.0 124.4V145.6M1061.0 120.7V149.3M1064.0 126.9V143.1M1067.0 129.1V140.9M1070.0 133.1V136.9M1073.0 133.8V136.2M1076.0 133.8V136.2M1079.0 133.1V136.9M1082.0 129.4V140.6M1085.0 127.3V142.7M1088.0 121.9V148.1M1091.0 122.7V147.3M1094.0 126.3V143.7M1097.0 130.8V139.2M1100.0 133.0V137.0M1103.0 132.8V137.2M1106.0 130.3V139.7M1109.0 124.6V145.4M1112.0 124.8V145.2M1115.0 119.0V151.0M1118.0 123.2V146.8M1121.0 127.3V142.7M1124.0 132.1V137.9M1127.0 133.8V136.2" stroke="#95c1bf" stroke-width="1.6" stroke-linecap="round"/>
+<rect x="1224" y="96.0" width="128" height="64.0" rx="4" fill="#3f8f8b" fill-opacity="0.32" stroke="#3f8f8b" stroke-opacity="0.9"/>
+<text x="1230" y="109.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#c5dddc">Far away now</text>
+<path d="M1228.0 133.8V136.2M1231.0 132.1V137.9M1234.0 128.8V141.2M1237.0 123.8V146.2M1240.0 127.9V142.1M1243.0 128.3V141.7M1246.0 131.2V138.8M1249.0 133.2V136.8M1252.0 133.8V136.2M1255.0 133.8V136.2M1258.0 133.8V136.2M1261.0 133.8V136.2M1264.0 133.6V136.4M1267.0 130.2V139.8M1270.0 126.1V143.9M1273.0 127.7V142.3M1276.0 127.9V142.1M1279.0 129.9V140.1M1282.0 132.5V137.5M1285.0 133.8V136.2M1288.0 133.6V136.4M1291.0 132.0V138.0M1294.0 130.4V139.6M1297.0 126.7V143.3M1300.0 127.2V142.8M1303.0 128.8V141.2M1306.0 131.1V138.9M1309.0 133.7V136.3M1312.0 133.8V136.2M1315.0 133.8V136.2M1318.0 133.8V136.2M1321.0 133.8V136.2M1324.0 133.4V136.6M1327.0 130.6V139.4M1330.0 125.2V144.8M1333.0 120.5V149.5M1336.0 122.0V148.0M1339.0 124.4V145.6M1342.0 129.9V140.1M1345.0 132.0V138.0" stroke="#95c1bf" stroke-width="1.6" stroke-linecap="round"/>
+<path d="M600 165.0H1320" stroke="#26262b"/>
+<rect x="610" y="176.0" width="3" height="52.0" rx="1.5" fill="#4c6fa6"/>
+<text x="622" y="189.0" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#62626b">A2</text>
+<text x="622" y="206.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="12.5" fill="#c9c9d0">Ryan</text>
+<rect x="836" y="170.0" width="98" height="64.0" rx="4" fill="#4c6fa6" fill-opacity="0.32" stroke="#4c6fa6" stroke-opacity="0.9"/>
+<text x="842" y="183.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#c9d4e4">Still here?</text>
+<path d="M840.0 206.2V211.8M843.0 203.3V214.7M846.0 201.7V216.3M849.0 200.7V217.3M852.0 204.5V213.5M855.0 205.1V212.9M858.0 207.8V210.2M861.0 207.8V210.2M864.0 207.8V210.2M867.0 207.8V210.2M870.0 207.2V210.8M873.0 205.3V212.7M876.0 198.9V219.1M879.0 195.1V222.9M882.0 199.2V218.8M885.0 202.3V215.7M888.0 206.5V211.5M891.0 207.8V210.2M894.0 207.8V210.2M897.0 207.8V210.2M900.0 207.8V210.2M903.0 207.8V210.2M906.0 207.0V211.0M909.0 202.0V216.0M912.0 200.7V217.3M915.0 202.0V216.0M918.0 202.0V216.0M921.0 206.2V211.8M924.0 207.4V210.6M927.0 207.8V210.2" stroke="#9db0ce" stroke-width="1.6" stroke-linecap="round"/>
+<rect x="1140" y="170.0" width="76" height="64.0" rx="4" fill="#4c6fa6" fill-opacity="0.32" stroke="#4c6fa6" stroke-opacity="0.9"/>
+<text x="1146" y="183.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#c9d4e4">I'll wait.</text>
+<path d="M1144.0 207.8V210.2M1147.0 207.8V210.2M1150.0 207.8V210.2M1153.0 207.2V210.8M1156.0 205.4V212.6M1159.0 202.8V215.2M1162.0 197.2V220.8M1165.0 196.4V221.6M1168.0 200.5V217.5M1171.0 204.7V213.3M1174.0 207.4V210.6M1177.0 207.8V210.2M1180.0 207.8V210.2M1183.0 207.8V210.2M1186.0 207.8V210.2M1189.0 207.8V210.2M1192.0 205.9V212.1M1195.0 202.1V215.9M1198.0 199.8V218.2M1201.0 197.3V220.7M1204.0 199.4V218.6M1207.0 205.2V212.8M1210.0 207.1V210.9" stroke="#9db0ce" stroke-width="1.6" stroke-linecap="round"/>
+<path d="M600 239.0H1320" stroke="#26262b"/>
+<rect x="610" y="250.0" width="3" height="52.0" rx="1.5" fill="#7b5ca8"/>
+<text x="622" y="263.0" font-family="'JetBrains Mono', 'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace" font-size="10.5" fill="#62626b">A3</text>
+<text x="622" y="280.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="12.5" fill="#c9c9d0">Ono_Anna</text>
+<rect x="942" y="244.0" width="92" height="64.0" rx="4" fill="#7b5ca8" fill-opacity="0.32" stroke="#7b5ca8" stroke-opacity="0.9"/>
+<text x="948" y="257.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#d7cee5">Listen…</text>
+<path d="M946.0 281.8V284.2M949.0 281.8V284.2M952.0 281.7V284.3M955.0 279.3V286.7M958.0 276.8V289.2M961.0 272.9V293.1M964.0 271.3V294.7M967.0 277.1V288.9M970.0 278.2V287.8M973.0 280.7V285.3M976.0 281.8V284.2M979.0 281.8V284.2M982.0 281.8V284.2M985.0 280.7V285.3M988.0 276.1V289.9M991.0 274.8V291.2M994.0 271.2V294.8M997.0 272.7V293.3M1000.0 278.6V287.4M1003.0 281.1V284.9M1006.0 281.6V284.4M1009.0 279.5V286.5M1012.0 277.9V288.1M1015.0 275.8V290.2M1018.0 275.2V290.8M1021.0 273.7V292.3M1024.0 278.1V287.9M1027.0 281.7V284.3" stroke="#b6a5cf" stroke-width="1.6" stroke-linecap="round"/>
+<rect x="1360" y="244.0" width="72" height="64.0" rx="4" fill="#7b5ca8" fill-opacity="0.32" stroke="#7b5ca8" stroke-opacity="0.9"/>
+<text x="1366" y="257.0" font-family="Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="10" fill="#d7cee5">Mm.</text>
+<path d="M1364.0 281.8V284.2M1367.0 281.8V284.2M1370.0 281.8V284.2M1373.0 278.9V287.1M1376.0 275.4V290.6M1379.0 271.6V294.4M1382.0 266.6V299.4M1385.0 272.4V293.6M1388.0 274.7V291.3M1391.0 279.4V286.6M1394.0 281.8V284.2M1397.0 281.8V284.2M1400.0 281.8V284.2M1403.0 281.8V284.2M1406.0 281.8V284.2M1409.0 281.8V284.2M1412.0 279.4V286.6M1415.0 277.2V288.8M1418.0 270.2V295.8M1421.0 273.2V292.8M1424.0 275.2V290.8M1427.0 278.5V287.5" stroke="#b6a5cf" stroke-width="1.6" stroke-linecap="round"/>
+<rect x="1078" y="88" width="12" height="234" fill="#e5484d" fill-opacity="0.06"/>
+<path d="M1084 86V322" stroke="#e5484d" stroke-width="1.6"/>
+<path d="M1078 76h12v5l-6 6l-6-6z" fill="#e5484d"/>
+</g>
+</g>
+</svg>

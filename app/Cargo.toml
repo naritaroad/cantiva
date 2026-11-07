@@ -4,6 +4,9 @@ edition.workspace = true
 version.workspace = true
 license.workspace = true
 authors.workspace = true
+description = "Cantiva desktop app: a local TTS studio with a multi-track timeline"
+repository.workspace = true
+homepage.workspace = true
 rust-version.workspace = true
 
 [dependencies]

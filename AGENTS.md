@@ -51,3 +51,9 @@ The `dev-sine` engine (shown only with `CANTIVA_DEV=1`) fakes speech so the whol
 ## Changelog
 
 Every user-visible change gets an entry under `[Unreleased]` in `CHANGELOG.md` in the same commit.
+
+## Docs
+
+- `README.md` (English) and `README.zh-TW.md` carry the same sections; change both together.
+- English docs live in `docs/`, their zh-TW translations in `docs/zh-TW/`. Keep each pair in sync.
+- Human contributors read `CONTRIBUTING.md`; keep its rules consistent with this file.

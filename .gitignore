@@ -4,3 +4,9 @@ __pycache__/
 *.pyc
 .venv/
 *.wav.part
+
+# Editors and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

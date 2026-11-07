@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Windows
+    runs-on: windows-latest
+    env:
+      CARGO_TERM_COLOR: always
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Install Rust
+        run: rustup update stable && rustup default stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Rust tests
+        run: cargo test --workspace
+      - name: Python worker tests
+        run: python -m unittest discover engines/_worker/tests
+      - name: MCP end-to-end test
+        run: |
+          cargo build
+          python tests/e2e_mcp.py

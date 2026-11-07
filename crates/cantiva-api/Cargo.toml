@@ -4,6 +4,9 @@ edition.workspace = true
 version.workspace = true
 license.workspace = true
 authors.workspace = true
+description = "Cantiva local control API (127.0.0.1, token auth) and client"
+repository.workspace = true
+homepage.workspace = true
 rust-version.workspace = true
 
 [dependencies]

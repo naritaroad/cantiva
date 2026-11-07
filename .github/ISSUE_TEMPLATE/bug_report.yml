@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in Cantiva or cantiva-mcp doesn't work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security problems go through the private process in SECURITY.md, not here.
+        中文回報也可以。
+  - type: input
+    id: version
+    attributes:
+      label: Cantiva version
+      description: Shown in the About window, or `cantiva-mcp` → `status`.
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Desktop app (UI, timeline, export)
+        - Engine install or synthesis
+        - MCP server / agent integration
+        - Tunnel
+        - Setup scripts
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: engine
+    attributes:
+      label: Engine
+      description: Which engine was loaded, if any.
+      placeholder: qwen3-tts
+  - type: input
+    id: system
+    attributes:
+      label: System
+      description: Windows version, GPU and VRAM.
+      placeholder: Windows 11 24H2, RTX 4070 12 GB
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Steps to reproduce, what you expected, and what you got.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant lines from %USERPROFILE%\Cantiva\logs or the engine's install window. Remove anything private.
+      render: text

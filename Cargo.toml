@@ -16,6 +16,8 @@ edition = "2024"
 rust-version = "1.92"
 license = "MIT"
 authors = ["Naritaroad (Lrniey666)"]
+repository = "https://github.com/naritaroad/cantiva"
+homepage = "https://github.com/naritaroad/cantiva"
 
 [profile.release]
 lto = "thin"
